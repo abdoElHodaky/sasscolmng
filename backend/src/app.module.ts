@@ -10,6 +10,9 @@ import { AuthModule } from './auth/auth.module';
 import { TenantModule } from './tenant/tenant.module';
 import { UsersModule } from './users/users.module';
 import { SchoolsModule } from './schools/schools.module';
+import { SubjectsModule } from './subjects/subjects.module';
+import { ClassesModule } from './classes/classes.module';
+import { RoomsModule } from './rooms/rooms.module';
 
 // Common modules
 import { CommonModule } from './common/common.module';
@@ -51,6 +54,9 @@ import { AppService } from './app.service';
     TenantModule,
     UsersModule,
     SchoolsModule,
+    SubjectsModule,
+    ClassesModule,
+    RoomsModule,
 
     // Feature modules (Phase 2+)
     // SchedulingModule,
@@ -75,4 +81,3 @@ import { AppService } from './app.service';
   ],
 })
 export class AppModule {}
-
