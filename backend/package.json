@@ -59,7 +59,15 @@
     "nest-winston": "^1.9.4",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "google-or-tools": "^9.8.3296",
+    "node-cron": "^3.0.3",
+    "moment": "^2.29.4",
+    "moment-timezone": "^0.5.43",
+    "lodash": "^4.17.21",
+    "pdf-lib": "^1.17.1",
+    "exceljs": "^4.4.0",
+    "ical-generator": "^4.1.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
@@ -76,6 +84,8 @@
     "@types/cors": "^2.8.17",
     "@types/nodemailer": "^6.4.14",
     "@types/uuid": "^9.0.7",
+    "@types/node-cron": "^3.0.11",
+    "@types/lodash": "^4.14.202",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.42.0",
@@ -109,4 +119,3 @@
     "testEnvironment": "node"
   }
 }
-

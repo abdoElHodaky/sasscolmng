@@ -13,6 +13,7 @@ import { SchoolsModule } from './schools/schools.module';
 import { SubjectsModule } from './subjects/subjects.module';
 import { ClassesModule } from './classes/classes.module';
 import { RoomsModule } from './rooms/rooms.module';
+import { SchedulingModule } from './scheduling/scheduling.module';
 
 // Common modules
 import { CommonModule } from './common/common.module';
@@ -58,8 +59,8 @@ import { AppService } from './app.service';
     ClassesModule,
     RoomsModule,
 
-    // Feature modules (Phase 2+)
-    // SchedulingModule,
+    // Feature modules (Phase 3+)
+    SchedulingModule,
     // NotificationsModule,
     // BillingModule,
   ],

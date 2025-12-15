@@ -1,0 +1,517 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum UserRole {
+  SUPER_ADMIN
+  SCHOOL_ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum RoomType {
+  CLASSROOM
+  LABORATORY
+  AUDITORIUM
+  CAFETERIA
+  LIBRARY
+  GYMNASIUM
+  OFFICE
+  OTHER
+}
+
+enum TimeSlotType {
+  REGULAR
+  BREAK
+  LUNCH
+  ASSEMBLY
+  EXAM
+}
+
+enum ScheduleStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  ACTIVE
+  ARCHIVED
+}
+
+enum SessionType {
+  REGULAR
+  EXAM
+  LAB
+  SPECIAL
+  MAKEUP
+}
+
+enum SessionStatus {
+  SCHEDULED
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum ConflictType {
+  TEACHER_CONFLICT
+  ROOM_CONFLICT
+  TIME_CONFLICT
+  CAPACITY_CONFLICT
+  RESOURCE_CONFLICT
+}
+
+enum ConflictSeverity {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum PreferenceType {
+  TEACHER_PREFERENCE
+  ROOM_PREFERENCE
+  TIME_PREFERENCE
+  WORKLOAD_DISTRIBUTION
+  SUBJECT_PREFERENCE
+  CLASS_PREFERENCE
+}
+
+enum EntityType {
+  TEACHER
+  ROOM
+  SUBJECT
+  CLASS
+  SCHOOL
+}
+
+enum RuleType {
+  INSTITUTIONAL_POLICY
+  TEACHER_AVAILABILITY
+  ROOM_AVAILABILITY
+  TIME_RESTRICTION
+  WORKLOAD_LIMIT
+  CONSECUTIVE_PERIODS
+}
+
+enum AvailabilityType {
+  AVAILABLE
+  PREFERRED
+  UNAVAILABLE
+  LIMITED
+}
+
+enum AcademicPeriodType {
+  SEMESTER
+  QUARTER
+  TRIMESTER
+  YEAR
+}
+
+// Core Models
+model Tenant {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  subdomain   String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  schools School[]
+  users   User[]
+
+  @@map("tenants")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  password     String
+  firstName    String
+  lastName     String
+  role         UserRole
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  tenantId     String
+  schoolId     String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  school        School?        @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  refreshTokens RefreshToken[]
+
+  // Teaching relations
+  teacherSubjects    TeacherSubject[]
+  teachingSessions   ScheduleSession[] @relation("TeacherSessions")
+  createdSchedules   Schedule[]        @relation("ScheduleCreator")
+  approvedSchedules  Schedule[]        @relation("ScheduleApprover")
+  teacherAvailability TeacherAvailability[]
+  createdPreferences SchedulingPreference[] @relation("PreferenceCreator")
+  createdRules       SchedulingRule[]       @relation("RuleCreator")
+
+  @@index([tenantId])
+  @@index([schoolId])
+  @@index([email])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model School {
+  id          String   @id @default(cuid())
+  name        String
+  address     String?
+  phone       String?
+  email       String?
+  website     String?
+  description String?
+  isActive    Boolean  @default(true)
+  tenantId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  users     User[]
+  subjects  Subject[]
+  classes   Class[]
+  rooms     Room[]
+  schedules Schedule[]
+  timeSlots TimeSlot[]
+  academicPeriods AcademicPeriod[]
+  schedulingPreferences SchedulingPreference[]
+  schedulingRules SchedulingRule[]
+
+  @@index([tenantId])
+  @@map("schools")
+}
+
+model Subject {
+  id          String   @id @default(cuid())
+  name        String
+  code        String
+  description String?
+  isActive    Boolean  @default(true)
+  schoolId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  school          School           @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  teachers        TeacherSubject[]
+  classSubjects   ClassSubject[]
+  sessions        ScheduleSession[]
+
+  @@index([schoolId])
+  @@map("subjects")
+}
+
+model Class {
+  id                String   @id @default(cuid())
+  name              String
+  grade             Int
+  section           String?
+  capacity          Int
+  currentEnrollment Int      @default(0)
+  isActive          Boolean  @default(true)
+  schoolId          String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  school        School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  subjects      ClassSubject[]
+  sessions      ScheduleSession[]
+
+  @@index([schoolId])
+  @@map("classes")
+}
+
+model Room {
+  id          String   @id @default(cuid())
+  name        String
+  type        RoomType
+  capacity    Int
+  floor       String?
+  building    String?
+  features    String[] // JSON array of features/equipment
+  isActive    Boolean  @default(true)
+  schoolId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  school   School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  sessions ScheduleSession[]
+
+  @@index([schoolId])
+  @@map("rooms")
+}
+
+// Junction Tables
+model TeacherSubject {
+  id        String   @id @default(cuid())
+  teacherId String
+  subjectId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  teacher User    @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, subjectId])
+  @@index([teacherId])
+  @@index([subjectId])
+  @@map("teacher_subjects")
+}
+
+model ClassSubject {
+  id        String   @id @default(cuid())
+  classId   String
+  subjectId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  class   Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, subjectId])
+  @@index([classId])
+  @@index([subjectId])
+  @@map("class_subjects")
+}
+
+// Scheduling Models
+model TimeSlot {
+  id          String       @id @default(cuid())
+  schoolId    String
+  name        String
+  dayOfWeek   Int          // 0=Sunday, 1=Monday, ..., 6=Saturday
+  startTime   String       // HH:mm format
+  endTime     String       // HH:mm format
+  duration    Int          // minutes
+  type        TimeSlotType @default(REGULAR)
+  isActive    Boolean      @default(true)
+  order       Int          // sequence in the day
+  maxSessions Int?         // max concurrent sessions
+  metadata    Json?        // additional metadata
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  school   School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  sessions ScheduleSession[]
+
+  @@index([schoolId])
+  @@index([dayOfWeek])
+  @@map("time_slots")
+}
+
+model AcademicPeriod {
+  id        String             @id @default(cuid())
+  schoolId  String
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  type      AcademicPeriodType
+  isActive  Boolean            @default(true)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  // Relations
+  school    School     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  schedules Schedule[]
+
+  @@index([schoolId])
+  @@map("academic_periods")
+}
+
+model Schedule {
+  id                 String         @id @default(cuid())
+  schoolId           String
+  academicPeriodId   String
+  name               String
+  description        String?
+  startDate          DateTime
+  endDate            DateTime
+  status             ScheduleStatus @default(DRAFT)
+  version            Int            @default(1)
+  isActive           Boolean        @default(false)
+  createdBy          String
+  approvedBy         String?
+  approvedAt         DateTime?
+  optimizationScore  Float?         // 0-100
+  conflictCount      Int            @default(0)
+  metadata           Json?          // generation metadata
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  // Relations
+  school         School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  academicPeriod AcademicPeriod    @relation(fields: [academicPeriodId], references: [id], onDelete: Cascade)
+  creator        User              @relation("ScheduleCreator", fields: [createdBy], references: [id])
+  approver       User?             @relation("ScheduleApprover", fields: [approvedBy], references: [id])
+  sessions       ScheduleSession[]
+  conflicts      ScheduleConflict[]
+
+  @@index([schoolId])
+  @@index([academicPeriodId])
+  @@index([status])
+  @@map("schedules")
+}
+
+model ScheduleSession {
+  id               String        @id @default(cuid())
+  scheduleId       String
+  subjectId        String
+  classId          String
+  teacherId        String
+  roomId           String
+  timeSlotId       String
+  date             DateTime
+  duration         Int           // minutes
+  type             SessionType   @default(REGULAR)
+  status           SessionStatus @default(SCHEDULED)
+  isRecurring      Boolean       @default(false)
+  recurrencePattern String?      // cron-like pattern
+  notes            String?
+  metadata         Json?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  // Relations
+  schedule Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  subject  Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  class    Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  teacher  User     @relation("TeacherSessions", fields: [teacherId], references: [id], onDelete: Cascade)
+  room     Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  timeSlot TimeSlot @relation(fields: [timeSlotId], references: [id], onDelete: Cascade)
+
+  @@index([scheduleId])
+  @@index([teacherId])
+  @@index([roomId])
+  @@index([timeSlotId])
+  @@index([date])
+  @@map("schedule_sessions")
+}
+
+model ScheduleConflict {
+  id                  String           @id @default(cuid())
+  scheduleId          String
+  type                ConflictType
+  severity            ConflictSeverity
+  description         String
+  affectedSessionIds  String[]         // array of session IDs
+  suggestedResolution String?
+  isResolved          Boolean          @default(false)
+  resolutionNotes     String?
+  resolvedBy          String?
+  resolvedAt          DateTime?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  // Relations
+  schedule Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@index([scheduleId])
+  @@index([type])
+  @@index([severity])
+  @@map("schedule_conflicts")
+}
+
+model SchedulingPreference {
+  id               String         @id @default(cuid())
+  schoolId         String
+  type             PreferenceType
+  entityId         String         // teacherId, roomId, etc.
+  entityType       EntityType
+  name             String
+  description      String?
+  weight           Int            // 1-10
+  isHardConstraint Boolean        @default(false)
+  parameters       Json           // preference parameters
+  isActive         Boolean        @default(true)
+  createdBy        String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  // Relations
+  school  School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  creator User   @relation("PreferenceCreator", fields: [createdBy], references: [id])
+
+  @@index([schoolId])
+  @@index([type])
+  @@index([entityId])
+  @@map("scheduling_preferences")
+}
+
+model SchedulingRule {
+  id          String   @id @default(cuid())
+  schoolId    String
+  name        String
+  description String
+  type        RuleType
+  priority    Int      // 1-10
+  isMandatory Boolean  @default(false)
+  conditions  Json     // rule conditions
+  actions     Json     // actions when violated
+  isActive    Boolean  @default(true)
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  school  School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  creator User   @relation("RuleCreator", fields: [createdBy], references: [id])
+
+  @@index([schoolId])
+  @@index([type])
+  @@map("scheduling_rules")
+}
+
+model TeacherAvailability {
+  id            String           @id @default(cuid())
+  teacherId     String
+  dayOfWeek     Int              // 0=Sunday, 1=Monday, ..., 6=Saturday
+  startTime     String           // HH:mm format
+  endTime       String           // HH:mm format
+  type          AvailabilityType
+  maxSessions   Int?             // max sessions during this time
+  specificDate  DateTime?        // for one-time changes
+  effectiveFrom DateTime
+  effectiveTo   DateTime?
+  notes         String?
+  isActive      Boolean          @default(true)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  // Relations
+  teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@index([teacherId])
+  @@index([dayOfWeek])
+  @@map("teacher_availability")
+}
+
