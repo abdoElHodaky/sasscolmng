@@ -24,6 +24,8 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 import { NotificationsModule } from './notifications/notifications.module';
 import { BillingModule } from './billing/billing.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { CacheModule } from './cache/cache.module';
+import { WaitingListModule } from './waiting-list/waiting-list.module';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -63,9 +65,11 @@ import { AppService } from './app.service';
     SchedulingModule,
     
     // Advanced features (Complete implementation)
+    CacheModule,
     NotificationsModule,
     BillingModule,
     AnalyticsModule,
+    WaitingListModule,
   ],
   controllers: [AppController],
   providers: [
