@@ -4,9 +4,12 @@ import { HardConstraintsService } from '../constraints/hard-constraints.service'
 import { SoftConstraintsService } from '../constraints/soft-constraints.service';
 import { ConstraintContext } from '../constraints/constraint.interface';
 
-// Note: This is a TypeScript wrapper for OR-Tools
-// In a production environment, you might want to use a Python microservice
-// or the experimental Node.js bindings for OR-Tools
+// Real OR-Tools CP-SAT Integration
+// This service integrates with Google OR-Tools Constraint Programming Solver
+// Using Python subprocess for OR-Tools CP-SAT solver
+import { spawn } from 'child_process';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class OrToolsService implements ISolver {
@@ -56,9 +59,8 @@ export class OrToolsService implements ISolver {
         };
       }
 
-      // For now, implement a basic heuristic solver
-      // In production, this would integrate with actual OR-Tools CP-SAT
-      const result = await this.heuristicSolver(request, solverConfig);
+      // Use real OR-Tools CP-SAT solver
+      const result = await this.cpSatSolver(request, solverConfig);
 
       // Calculate soft constraint optimization score
       if (result.success && result.schedule.length > 0) {
@@ -160,6 +162,116 @@ export class OrToolsService implements ISolver {
       preferences: request.preferences,
       rules: request.constraints,
     };
+  }
+
+  private async cpSatSolver(request: SchedulingRequest, config: SolverConfiguration): Promise<SchedulingResult> {
+    try {
+      // Prepare data for Python CP-SAT solver
+      const solverInput = {
+        teachers: request.teachers,
+        rooms: request.rooms,
+        subjects: request.subjects,
+        classes: request.classes,
+        timeSlots: request.timeSlots,
+        preferences: request.preferences || [],
+        constraints: {
+          hard: await this.getHardConstraints(),
+          soft: await this.getSoftConstraints(),
+        },
+        config: {
+          maxSolvingTime: config.maxSolvingTimeSeconds,
+          optimizationLevel: config.optimizationLevel,
+        },
+      };
+
+      // Write input to temporary file
+      const inputFile = path.join(process.cwd(), 'temp', `solver_input_${Date.now()}.json`);
+      const outputFile = path.join(process.cwd(), 'temp', `solver_output_${Date.now()}.json`);
+      
+      // Ensure temp directory exists
+      const tempDir = path.dirname(inputFile);
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+
+      fs.writeFileSync(inputFile, JSON.stringify(solverInput, null, 2));
+
+      // Run Python CP-SAT solver
+      const result = await this.runPythonSolver(inputFile, outputFile);
+
+      // Clean up temporary files
+      if (fs.existsSync(inputFile)) fs.unlinkSync(inputFile);
+      if (fs.existsSync(outputFile)) fs.unlinkSync(outputFile);
+
+      return result;
+    } catch (error) {
+      this.logger.error(`CP-SAT solver failed: ${error.message}`);
+      // Fallback to heuristic solver
+      return this.heuristicSolver(request, config);
+    }
+  }
+
+  private async runPythonSolver(inputFile: string, outputFile: string): Promise<SchedulingResult> {
+    return new Promise((resolve, reject) => {
+      const pythonScript = path.join(process.cwd(), 'scripts', 'cp_sat_solver.py');
+      const pythonProcess = spawn('python3', [pythonScript, inputFile, outputFile]);
+
+      let stdout = '';
+      let stderr = '';
+
+      pythonProcess.stdout.on('data', (data) => {
+        stdout += data.toString();
+      });
+
+      pythonProcess.stderr.on('data', (data) => {
+        stderr += data.toString();
+      });
+
+      pythonProcess.on('close', (code) => {
+        if (code === 0) {
+          try {
+            if (fs.existsSync(outputFile)) {
+              const result = JSON.parse(fs.readFileSync(outputFile, 'utf8'));
+              resolve(result);
+            } else {
+              reject(new Error('Solver output file not found'));
+            }
+          } catch (error) {
+            reject(new Error(`Failed to parse solver output: ${error.message}`));
+          }
+        } else {
+          reject(new Error(`Python solver failed with code ${code}: ${stderr}`));
+        }
+      });
+
+      pythonProcess.on('error', (error) => {
+        reject(new Error(`Failed to start Python solver: ${error.message}`));
+      });
+    });
+  }
+
+  private async getHardConstraints(): Promise<any[]> {
+    // Return hard constraint definitions for Python solver
+    return [
+      { type: 'TEACHER_CONFLICT', priority: 10, cost: 1000 },
+      { type: 'ROOM_CONFLICT', priority: 10, cost: 1000 },
+      { type: 'CLASS_CONFLICT', priority: 10, cost: 1000 },
+      { type: 'TEACHER_AVAILABILITY', priority: 9, cost: 800 },
+      { type: 'ROOM_CAPACITY', priority: 8, cost: 600 },
+      { type: 'TIME_SLOT_VALIDITY', priority: 10, cost: 1000 },
+    ];
+  }
+
+  private async getSoftConstraints(): Promise<any[]> {
+    // Return soft constraint definitions for Python solver
+    return [
+      { type: 'TEACHER_PREFERENCE', priority: 8, weight: 8 },
+      { type: 'TIME_PREFERENCE', priority: 6, weight: 6 },
+      { type: 'WORKLOAD_DISTRIBUTION', priority: 7, weight: 7 },
+      { type: 'ROOM_PREFERENCE', priority: 5, weight: 5 },
+      { type: 'SUBJECT_PREFERENCE', priority: 4, weight: 4 },
+      { type: 'CONSECUTIVE_PERIODS', priority: 6, weight: 6 },
+    ];
   }
 
   private async heuristicSolver(request: SchedulingRequest, config: any): Promise<Partial<SchedulingResult>> {

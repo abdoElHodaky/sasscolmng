@@ -20,10 +20,10 @@ import { CommonModule } from './common/common.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
-// Feature modules (to be implemented in later phases)
-// import { SchedulingModule } from './scheduling/scheduling.module';
-// import { NotificationsModule } from './notifications/notifications.module';
-// import { BillingModule } from './billing/billing.module';
+// Advanced feature modules
+import { NotificationsModule } from './notifications/notifications.module';
+import { BillingModule } from './billing/billing.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -61,8 +61,11 @@ import { AppService } from './app.service';
 
     // Feature modules (Phase 3+)
     SchedulingModule,
-    // NotificationsModule,
-    // BillingModule,
+    
+    // Advanced features (Complete implementation)
+    NotificationsModule,
+    BillingModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [

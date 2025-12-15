@@ -61,6 +61,7 @@
     "rxjs": "^7.8.1",
     "uuid": "^9.0.1",
     "google-or-tools": "^9.8.3296",
+    "ortools": "^1.0.0",
     "node-cron": "^3.0.3",
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.43",
