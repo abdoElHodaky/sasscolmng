@@ -468,49 +468,93 @@ sequenceDiagram
 
 ## 📢 **Notification System**
 
-### **Multi-Channel Architecture**
+### **Multi-Channel Architecture (Current Implementation - 70% Complete)**
 
 ```mermaid
 graph TB
-    subgraph "Notification Request"
-        TRIGGER[Event Trigger]
-        TEMPLATE[Template Engine]
-        RECIPIENTS[Recipient List]
+    subgraph "API Layer"
+        REST_ENDPOINTS[10 REST Endpoints]
+        DTO_VALIDATION[DTO Validation]
+        JWT_AUTH[JWT Authentication]
+        RATE_LIMITING[Rate Limiting]
     end
     
-    subgraph "Notification Service"
-        ROUTER[Channel Router]
-        QUEUE[Background Queue]
-        PROCESSOR[Notification Processor]
+    subgraph "Service Layer - IMPLEMENTED ✅"
+        NOTIFICATION_SERVICE[NotificationService]
+        EMAIL_SERVICE[EmailService - Dual Provider]
+        WEBSOCKET_GATEWAY[WebSocketGateway]
+        NOTIFICATION_PROCESSOR[NotificationProcessor]
+    end
+    
+    subgraph "Queue System - IMPLEMENTED ✅"
+        BULL_QUEUE[(Bull Queue + Redis)]
+        PRIORITY_PROCESSING[Priority Processing]
+        RETRY_LOGIC[Retry Logic - 3 attempts]
+        ERROR_HANDLING[Error Handling]
     end
     
     subgraph "Delivery Channels"
-        EMAIL[Email Service]
-        SMS[SMS Service]
-        WEBSOCKET[WebSocket Service]
-        PUSH[Push Notifications]
+        EMAIL_DUAL[Email - Dual Provider ✅]
+        WEBSOCKET_REALTIME[WebSocket - Real-time ✅]
+        SMS_SERVICE[SMS Service - TODO 🔄]
+        PUSH_SERVICE[Push Notifications - TODO 🔄]
     end
     
-    subgraph "External Services"
-        SMTP[SMTP Server]
-        TWILIO[Twilio API]
-        FCM[Firebase FCM]
+    subgraph "External Integrations"
+        SENDGRID[SendGrid API ✅]
+        SMTP_SERVER[SMTP Fallback ✅]
+        SOCKET_IO[Socket.io ✅]
+        TWILIO[Twilio - Pending 🔄]
+        FCM[Firebase FCM - Pending 🔄]
     end
     
-    TRIGGER --> TEMPLATE
-    TEMPLATE --> RECIPIENTS
-    RECIPIENTS --> ROUTER
-    ROUTER --> QUEUE
-    QUEUE --> PROCESSOR
+    subgraph "Database Layer - IMPLEMENTED ✅"
+        NOTIFICATION_RECORDS[(Notification Records)]
+        DELIVERY_STATUS[Delivery Status Tracking]
+        AUDIT_LOGS[Audit Logs]
+        PRISMA_ORM[Prisma ORM]
+    end
     
-    PROCESSOR --> EMAIL
-    PROCESSOR --> SMS
-    PROCESSOR --> WEBSOCKET
-    PROCESSOR --> PUSH
+    REST_ENDPOINTS --> DTO_VALIDATION
+    DTO_VALIDATION --> JWT_AUTH
+    JWT_AUTH --> RATE_LIMITING
+    RATE_LIMITING --> NOTIFICATION_SERVICE
     
-    EMAIL --> SMTP
-    SMS --> TWILIO
-    PUSH --> FCM
+    NOTIFICATION_SERVICE --> EMAIL_SERVICE
+    NOTIFICATION_SERVICE --> WEBSOCKET_GATEWAY
+    NOTIFICATION_SERVICE --> BULL_QUEUE
+    NOTIFICATION_SERVICE --> PRISMA_ORM
+    
+    BULL_QUEUE --> PRIORITY_PROCESSING
+    PRIORITY_PROCESSING --> NOTIFICATION_PROCESSOR
+    NOTIFICATION_PROCESSOR --> RETRY_LOGIC
+    RETRY_LOGIC --> ERROR_HANDLING
+    
+    NOTIFICATION_PROCESSOR --> EMAIL_DUAL
+    NOTIFICATION_PROCESSOR --> WEBSOCKET_REALTIME
+    NOTIFICATION_PROCESSOR --> SMS_SERVICE
+    NOTIFICATION_PROCESSOR --> PUSH_SERVICE
+    
+    EMAIL_DUAL --> SENDGRID
+    EMAIL_DUAL --> SMTP_SERVER
+    WEBSOCKET_REALTIME --> SOCKET_IO
+    SMS_SERVICE -.-> TWILIO
+    PUSH_SERVICE -.-> FCM
+    
+    NOTIFICATION_SERVICE --> NOTIFICATION_RECORDS
+    NOTIFICATION_RECORDS --> DELIVERY_STATUS
+    DELIVERY_STATUS --> AUDIT_LOGS
+    
+    style EMAIL_DUAL fill:#90EE90
+    style WEBSOCKET_REALTIME fill:#90EE90
+    style SENDGRID fill:#90EE90
+    style SMTP_SERVER fill:#90EE90
+    style SOCKET_IO fill:#90EE90
+    style NOTIFICATION_RECORDS fill:#90EE90
+    style SMS_SERVICE fill:#FFE4B5
+    style PUSH_SERVICE fill:#FFE4B5
+    style TWILIO fill:#FFB6C1
+    style FCM fill:#FFB6C1
 ```
 
 ### **Real-time WebSocket Architecture**
@@ -646,6 +690,118 @@ graph LR
     
     PRISMA_FILTER --> ROW_LEVEL
     ROW_LEVEL --> TENANT_SCOPE
+```
+
+---
+
+## 💳 **Billing System Architecture**
+
+### **Payment Processing Flow (Planned Implementation)**
+
+```mermaid
+graph TB
+    subgraph "Billing API Layer"
+        BILLING_ENDPOINTS[Billing REST Endpoints]
+        SUBSCRIPTION_API[Subscription Management]
+        INVOICE_API[Invoice Generation]
+        PAYMENT_API[Payment Processing]
+    end
+    
+    subgraph "Billing Services - TODO 🔄"
+        BILLING_SERVICE[BillingService]
+        STRIPE_SERVICE[StripeService]
+        INVOICE_SERVICE[InvoiceService]
+        SUBSCRIPTION_SERVICE[SubscriptionService]
+    end
+    
+    subgraph "Payment Processing"
+        STRIPE_INTEGRATION[Stripe Integration]
+        WEBHOOK_HANDLER[Webhook Handler]
+        PAYMENT_VALIDATION[Payment Validation]
+        REFUND_PROCESSING[Refund Processing]
+    end
+    
+    subgraph "Invoice Management"
+        PDF_GENERATOR[PDF Generator]
+        EMAIL_DELIVERY[Email Delivery]
+        INVOICE_STORAGE[Invoice Storage]
+        TAX_CALCULATION[Tax Calculation]
+    end
+    
+    subgraph "Subscription Management"
+        PLAN_MANAGEMENT[Plan Management]
+        USAGE_TRACKING[Usage Tracking]
+        BILLING_CYCLES[Billing Cycles]
+        PRORATION[Proration Logic]
+    end
+    
+    subgraph "Database Layer"
+        BILLING_RECORDS[(Billing Records)]
+        SUBSCRIPTION_DATA[(Subscription Data)]
+        INVOICE_DATA[(Invoice Data)]
+        PAYMENT_HISTORY[(Payment History)]
+    end
+    
+    BILLING_ENDPOINTS --> BILLING_SERVICE
+    SUBSCRIPTION_API --> SUBSCRIPTION_SERVICE
+    INVOICE_API --> INVOICE_SERVICE
+    PAYMENT_API --> STRIPE_SERVICE
+    
+    BILLING_SERVICE --> STRIPE_INTEGRATION
+    STRIPE_SERVICE --> STRIPE_INTEGRATION
+    STRIPE_INTEGRATION --> WEBHOOK_HANDLER
+    WEBHOOK_HANDLER --> PAYMENT_VALIDATION
+    
+    INVOICE_SERVICE --> PDF_GENERATOR
+    PDF_GENERATOR --> EMAIL_DELIVERY
+    INVOICE_SERVICE --> INVOICE_STORAGE
+    INVOICE_SERVICE --> TAX_CALCULATION
+    
+    SUBSCRIPTION_SERVICE --> PLAN_MANAGEMENT
+    SUBSCRIPTION_SERVICE --> USAGE_TRACKING
+    SUBSCRIPTION_SERVICE --> BILLING_CYCLES
+    SUBSCRIPTION_SERVICE --> PRORATION
+    
+    BILLING_SERVICE --> BILLING_RECORDS
+    SUBSCRIPTION_SERVICE --> SUBSCRIPTION_DATA
+    INVOICE_SERVICE --> INVOICE_DATA
+    STRIPE_SERVICE --> PAYMENT_HISTORY
+    
+    style BILLING_SERVICE fill:#FFE4B5
+    style STRIPE_SERVICE fill:#FFE4B5
+    style INVOICE_SERVICE fill:#FFE4B5
+    style SUBSCRIPTION_SERVICE fill:#FFE4B5
+    style STRIPE_INTEGRATION fill:#FFB6C1
+    style PDF_GENERATOR fill:#FFB6C1
+```
+
+### **Subscription Lifecycle**
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant BillingAPI
+    participant StripeService
+    participant Stripe
+    participant WebhookHandler
+    participant NotificationService
+    
+    Client->>BillingAPI: POST /subscriptions/create
+    BillingAPI->>StripeService: createSubscription()
+    StripeService->>Stripe: Create Customer & Subscription
+    Stripe-->>StripeService: Subscription Created
+    StripeService-->>BillingAPI: Subscription Data
+    BillingAPI-->>Client: 201 + Subscription Details
+    
+    Note over Stripe,WebhookHandler: Payment Processing
+    Stripe->>WebhookHandler: invoice.payment_succeeded
+    WebhookHandler->>BillingAPI: updateSubscriptionStatus()
+    BillingAPI->>NotificationService: sendPaymentConfirmation()
+    
+    Note over Stripe,WebhookHandler: Payment Failed
+    Stripe->>WebhookHandler: invoice.payment_failed
+    WebhookHandler->>BillingAPI: handlePaymentFailure()
+    BillingAPI->>NotificationService: sendPaymentFailureAlert()
 ```
 
 ---
@@ -841,4 +997,3 @@ graph LR
 ---
 
 This architecture documentation provides a comprehensive overview of the system design, from high-level concepts to detailed implementation patterns. Each diagram illustrates key architectural decisions and their relationships within the overall system.
-

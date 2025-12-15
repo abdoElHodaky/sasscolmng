@@ -3,6 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { BullModule } from '@nestjs/bull';
 import { NotificationService } from './services/notification.service';
 import { EmailService } from './services/email.service';
+import { SmsService } from './services/sms.service';
+import { PushService } from './services/push.service';
 import { WebSocketGateway } from './services/websocket.gateway';
 import { NotificationController } from './controllers/notification.controller';
 import { NotificationProcessor } from './services/notification.processor';
@@ -25,10 +27,11 @@ import { DatabaseModule } from '../database/database.module';
   providers: [
     NotificationService,
     EmailService,
+    SmsService,
+    PushService,
     WebSocketGateway,
     NotificationProcessor,
   ],
-  exports: [NotificationService, EmailService],
+  exports: [NotificationService, EmailService, SmsService, PushService],
 })
 export class NotificationsModule {}
-

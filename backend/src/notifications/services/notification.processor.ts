@@ -3,6 +3,8 @@ import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
 import { PrismaService } from '../../database/prisma.service';
 import { EmailService } from './email.service';
+import { SmsService } from './sms.service';
+import { PushService } from './push.service';
 import { WebSocketGateway } from './websocket.gateway';
 import { NotificationJob } from './notification.service';
 import { NotificationType } from '../dto';
@@ -14,6 +16,8 @@ export class NotificationProcessor {
   constructor(
     private prisma: PrismaService,
     private emailService: EmailService,
+    private smsService: SmsService,
+    private pushService: PushService,
     private webSocketGateway: WebSocketGateway,
   ) {}
 
@@ -155,9 +159,18 @@ export class NotificationProcessor {
 
   private async sendSMSNotification(data: NotificationJob): Promise<boolean> {
     try {
-      // TODO: Implement Twilio SMS integration
-      this.logger.warn('SMS notifications not yet implemented');
-      return false;
+      const result = await this.smsService.sendSms({
+        to: data.recipient,
+        message: data.message,
+      });
+
+      if (result.success) {
+        this.logger.log(`SMS notification sent successfully to ${data.recipient}`);
+        return true;
+      } else {
+        this.logger.warn(`SMS notification failed: ${result.error}`);
+        return false;
+      }
     } catch (error) {
       this.logger.error('SMS notification failed:', error);
       return false;
@@ -166,9 +179,20 @@ export class NotificationProcessor {
 
   private async sendPushNotification(data: NotificationJob): Promise<boolean> {
     try {
-      // TODO: Implement push notification integration (Firebase, etc.)
-      this.logger.warn('Push notifications not yet implemented');
-      return false;
+      const result = await this.pushService.sendPushNotification({
+        token: data.recipient, // For push notifications, recipient is the FCM token
+        title: data.subject,
+        body: data.message,
+        data: data.templateData || {},
+      });
+
+      if (result.success) {
+        this.logger.log(`Push notification sent successfully to ${data.recipient}`);
+        return true;
+      } else {
+        this.logger.warn(`Push notification failed: ${result.error}`);
+        return false;
+      }
     } catch (error) {
       this.logger.error('Push notification failed:', error);
       return false;
@@ -189,4 +213,3 @@ export class NotificationProcessor {
     `;
   }
 }
-
