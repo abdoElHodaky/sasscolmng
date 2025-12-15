@@ -347,7 +347,7 @@ CMD ["npm", "run", "start:prod"]
 # Production environment
 NODE_ENV=production
 PORT=3000
-DATABASE_URL="postgresql://user:pass@db:5432/sasscolmng_prod"
+DATABASE_URL="postgresql://user:password@database:5432/sasscolmng_prod"
 REDIS_HOST="redis"
 ```
 
@@ -401,4 +401,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **100% Feature Complete** - Production-ready
 
 **Built with ❤️ for educational institutions worldwide**
-
