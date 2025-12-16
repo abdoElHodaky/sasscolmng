@@ -404,7 +404,7 @@ CMD ["npm", "run", "start:prod"]
 # Production environment
 NODE_ENV=production
 PORT=3000
-DATABASE_URL="postgresql://user:password@database:5432/sasscolmng_prod"
+DATABASE_URL="postgresql://your_user:your_password@database_host:5432/sasscolmng_prod"
 REDIS_HOST="redis"
 ```
 
