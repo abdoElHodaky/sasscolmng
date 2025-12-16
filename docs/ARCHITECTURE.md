@@ -1,20 +1,32 @@
-# 🏗️ Architecture Documentation
+# 🏗️ System Architecture Documentation
 
 ## 📋 **Table of Contents**
-- [System Overview](#system-overview)
+- [Overview](#overview)
 - [High-Level Architecture](#high-level-architecture)
 - [Database Schema](#database-schema)
-- [API Architecture](#api-architecture)
-- [Scheduling Engine](#scheduling-engine)
-- [Notification System](#notification-system)
+- [Billing System Architecture](#billing-system-architecture)
+- [Notification System Architecture](#notification-system-architecture)
+- [API Layer Architecture](#api-layer-architecture)
+- [Data Flow Diagrams](#data-flow-diagrams)
 - [Security Architecture](#security-architecture)
 - [Deployment Architecture](#deployment-architecture)
 
 ---
 
-## 🌐 **System Overview**
+## 🌟 **Overview**
 
-The SaaS School Management Platform is built using a modern, scalable architecture that supports multi-tenancy, real-time communications, and intelligent scheduling.
+The SaaS School Management Platform follows a **multi-layered, multi-tenant architecture** designed for scalability, security, and maintainability. The system is built using **NestJS** with **Clean Architecture** principles, ensuring separation of concerns and testability.
+
+### **Core Architectural Principles**
+- **Multi-tenancy**: Complete tenant isolation at all layers
+- **Microservice-ready**: Modular design for easy service separation
+- **Event-driven**: Asynchronous processing with Bull Queue
+- **API-first**: RESTful APIs with comprehensive documentation
+- **Security-first**: JWT authentication with role-based access control
+
+---
+
+## 🏛️ **High-Level Architecture**
 
 ```mermaid
 graph TB
@@ -23,977 +35,787 @@ graph TB
         MOBILE[Mobile Apps]
         API_CLIENT[API Clients]
     end
-    
-    subgraph "API Gateway"
-        NGINX[NGINX Load Balancer]
+
+    subgraph "API Gateway Layer"
+        NGINX[Nginx Reverse Proxy]
         RATE_LIMIT[Rate Limiting]
-        AUTH_MIDDLEWARE[Auth Middleware]
+        CORS[CORS Handler]
     end
-    
+
     subgraph "Application Layer"
-        NESTJS[NestJS Backend]
-        WEBSOCKET[WebSocket Gateway]
-        QUEUE[Bull Queue]
+        AUTH[Authentication Service]
+        BILLING[Billing Service]
+        NOTIFICATION[Notification Service]
+        SCHEDULING[Scheduling Service]
+        ANALYTICS[Analytics Service]
     end
-    
-    subgraph "Business Logic"
-        AUTH[Authentication]
-        TENANT[Multi-Tenant]
-        SCHEDULING[Scheduling Engine]
-        NOTIFICATIONS[Notifications]
-        BILLING[Billing System]
-        ANALYTICS[Analytics]
-    end
-    
-    subgraph "Data Layer"
+
+    subgraph "Infrastructure Layer"
         POSTGRES[(PostgreSQL)]
         REDIS[(Redis Cache)]
-        FILES[File Storage]
+        QUEUE[Bull Queue]
+        SOLVER[OR-Tools Solver]
     end
-    
+
     subgraph "External Services"
         STRIPE[Stripe Payments]
+        SENDGRID[SendGrid Email]
         TWILIO[Twilio SMS]
-        SMTP[Email SMTP]
-        ORTOOLS[OR-Tools Solver]
+        FIREBASE[Firebase FCM]
     end
-    
+
     WEB --> NGINX
     MOBILE --> NGINX
     API_CLIENT --> NGINX
     
     NGINX --> RATE_LIMIT
-    RATE_LIMIT --> AUTH_MIDDLEWARE
-    AUTH_MIDDLEWARE --> NESTJS
+    RATE_LIMIT --> CORS
+    CORS --> AUTH
     
-    NESTJS --> AUTH
-    NESTJS --> TENANT
-    NESTJS --> SCHEDULING
-    NESTJS --> NOTIFICATIONS
-    NESTJS --> BILLING
-    NESTJS --> ANALYTICS
+    AUTH --> BILLING
+    AUTH --> NOTIFICATION
+    AUTH --> SCHEDULING
+    AUTH --> ANALYTICS
     
-    NESTJS --> WEBSOCKET
-    NESTJS --> QUEUE
-    
-    AUTH --> POSTGRES
-    TENANT --> POSTGRES
+    BILLING --> POSTGRES
+    NOTIFICATION --> POSTGRES
     SCHEDULING --> POSTGRES
-    SCHEDULING --> ORTOOLS
-    NOTIFICATIONS --> REDIS
+    ANALYTICS --> POSTGRES
+    
+    BILLING --> REDIS
+    NOTIFICATION --> REDIS
+    SCHEDULING --> REDIS
+    
+    NOTIFICATION --> QUEUE
+    SCHEDULING --> QUEUE
+    
+    SCHEDULING --> SOLVER
+    
     BILLING --> STRIPE
-    
-    QUEUE --> REDIS
-    WEBSOCKET --> REDIS
-    
-    NOTIFICATIONS --> SMTP
-    NOTIFICATIONS --> TWILIO
-```
-
----
-
-## 🏛️ **High-Level Architecture**
-
-### **Layered Architecture**
-
-```mermaid
-graph TD
-    subgraph "Presentation Layer"
-        REST[REST API Controllers]
-        WEBSOCKET_CTRL[WebSocket Controllers]
-        SWAGGER[Swagger Documentation]
-    end
-    
-    subgraph "Business Logic Layer"
-        SERVICES[Business Services]
-        VALIDATORS[Input Validators]
-        GUARDS[Authorization Guards]
-        INTERCEPTORS[Logging Interceptors]
-    end
-    
-    subgraph "Data Access Layer"
-        PRISMA[Prisma ORM]
-        REPOSITORIES[Repository Pattern]
-        MIGRATIONS[Database Migrations]
-    end
-    
-    subgraph "Infrastructure Layer"
-        DATABASE[(PostgreSQL)]
-        CACHE[(Redis)]
-        QUEUE_SYS[Queue System]
-        EXTERNAL[External APIs]
-    end
-    
-    REST --> SERVICES
-    WEBSOCKET_CTRL --> SERVICES
-    SERVICES --> PRISMA
-    PRISMA --> DATABASE
-    SERVICES --> CACHE
-    SERVICES --> QUEUE_SYS
-    SERVICES --> EXTERNAL
-```
-
-### **Module Architecture**
-
-```mermaid
-graph LR
-    subgraph "Core Modules"
-        AUTH_MOD[Auth Module]
-        USER_MOD[Users Module]
-        TENANT_MOD[Tenant Module]
-        COMMON_MOD[Common Module]
-    end
-    
-    subgraph "Business Modules"
-        SCHOOL_MOD[Schools Module]
-        SUBJECT_MOD[Subjects Module]
-        CLASS_MOD[Classes Module]
-        ROOM_MOD[Rooms Module]
-    end
-    
-    subgraph "Feature Modules"
-        SCHEDULE_MOD[Scheduling Module]
-        NOTIFY_MOD[Notifications Module]
-        BILLING_MOD[Billing Module]
-        ANALYTICS_MOD[Analytics Module]
-    end
-    
-    AUTH_MOD --> COMMON_MOD
-    USER_MOD --> AUTH_MOD
-    TENANT_MOD --> AUTH_MOD
-    
-    SCHOOL_MOD --> TENANT_MOD
-    SUBJECT_MOD --> SCHOOL_MOD
-    CLASS_MOD --> SCHOOL_MOD
-    ROOM_MOD --> SCHOOL_MOD
-    
-    SCHEDULE_MOD --> SCHOOL_MOD
-    NOTIFY_MOD --> USER_MOD
-    BILLING_MOD --> TENANT_MOD
-    ANALYTICS_MOD --> TENANT_MOD
+    NOTIFICATION --> SENDGRID
+    NOTIFICATION --> TWILIO
+    NOTIFICATION --> FIREBASE
 ```
 
 ---
 
 ## 🗄️ **Database Schema**
 
-### **Core Entities Relationship**
+### **Core Entity Relationships**
 
 ```mermaid
 erDiagram
     TENANT ||--o{ SCHOOL : contains
     TENANT ||--o{ USER : belongs_to
+    TENANT ||--o{ SUBSCRIPTION : has
+    TENANT ||--o{ NOTIFICATION : receives
+    
     SCHOOL ||--o{ USER : employs
     SCHOOL ||--o{ SUBJECT : offers
     SCHOOL ||--o{ CLASS : has
     SCHOOL ||--o{ ROOM : contains
-    SCHOOL ||--o{ SCHEDULE : creates
+    SCHOOL ||--o{ SUBSCRIPTION : subscribes_to
     
-    USER ||--o{ TEACHER_SUBJECT : teaches
-    SUBJECT ||--o{ TEACHER_SUBJECT : taught_by
-    SUBJECT ||--o{ CLASS_SUBJECT : assigned_to
-    CLASS ||--o{ CLASS_SUBJECT : studies
+    USER ||--o{ NOTIFICATION : receives
+    USER ||--o{ NOTIFICATION_PREFERENCE : configures
+    USER ||--o{ NOTIFICATION_TEMPLATE : creates
     
-    SCHEDULE ||--o{ SCHEDULE_SESSION : contains
-    SCHEDULE_SESSION }o--|| SUBJECT : for
-    SCHEDULE_SESSION }o--|| CLASS : with
-    SCHEDULE_SESSION }o--|| USER : taught_by
-    SCHEDULE_SESSION }o--|| ROOM : in
-    SCHEDULE_SESSION }o--|| TIME_SLOT : during
+    BILLING_PLAN ||--o{ SUBSCRIPTION : defines
+    SUBSCRIPTION ||--o{ INVOICE : generates
+    SUBSCRIPTION ||--o{ PAYMENT : processes
+    SUBSCRIPTION ||--o{ USAGE_METRIC : tracks
     
-    SCHEDULE ||--o{ SCHEDULE_CONFLICT : has
-    SCHOOL ||--o{ SCHEDULING_PREFERENCE : defines
-    SCHOOL ||--o{ SCHEDULING_RULE : enforces
-    USER ||--o{ TEACHER_AVAILABILITY : available
-```
-
-### **Multi-Tenant Data Isolation**
-
-```mermaid
-graph TB
-    subgraph "Tenant A Data"
-        TENANT_A[Tenant A]
-        SCHOOL_A1[School A1]
-        SCHOOL_A2[School A2]
-        USER_A[Users A]
-        DATA_A[Data A]
-    end
+    NOTIFICATION_TEMPLATE ||--o{ NOTIFICATION : uses
     
-    subgraph "Tenant B Data"
-        TENANT_B[Tenant B]
-        SCHOOL_B1[School B1]
-        USER_B[Users B]
-        DATA_B[Data B]
-    end
+    TENANT {
+        string id PK
+        string name
+        string subdomain
+        boolean isActive
+        datetime createdAt
+        datetime updatedAt
+    }
     
-    subgraph "Shared Infrastructure"
-        APP[Application Layer]
-        DB[(Database)]
-        CACHE[(Cache)]
-    end
+    SCHOOL {
+        string id PK
+        string tenantId FK
+        string name
+        string address
+        string phone
+        string email
+        boolean isActive
+    }
     
-    TENANT_A --> APP
-    TENANT_B --> APP
-    APP --> DB
-    APP --> CACHE
+    USER {
+        string id PK
+        string tenantId FK
+        string schoolId FK
+        string email
+        string firstName
+        string lastName
+        enum role
+        boolean isActive
+    }
     
-    TENANT_A -.-> SCHOOL_A1
-    TENANT_A -.-> SCHOOL_A2
-    TENANT_A -.-> USER_A
-    TENANT_A -.-> DATA_A
+    BILLING_PLAN {
+        string id PK
+        string name
+        enum type
+        decimal monthlyPrice
+        decimal yearlyPrice
+        json features
+        json limits
+        boolean isActive
+    }
     
-    TENANT_B -.-> SCHOOL_B1
-    TENANT_B -.-> USER_B
-    TENANT_B -.-> DATA_B
-```
-
----
-
-## 🔌 **API Architecture**
-
-### **RESTful API Design**
-
-```mermaid
-graph TD
-    subgraph "API Endpoints"
-        AUTH_API[/auth/*]
-        TENANT_API[/tenants/*]
-        SCHOOL_API[/schools/*]
-        USER_API[/users/*]
-        SCHEDULE_API[/scheduling/*]
-        NOTIFY_API[/notifications/*]
-        BILLING_API[/billing/*]
-        ANALYTICS_API[/analytics/*]
-    end
+    SUBSCRIPTION {
+        string id PK
+        string tenantId FK
+        string schoolId FK
+        string planId FK
+        enum status
+        enum billingCycle
+        datetime currentPeriodStart
+        datetime currentPeriodEnd
+        datetime trialStart
+        datetime trialEnd
+        string stripeSubscriptionId
+    }
     
-    subgraph "Middleware Stack"
-        CORS[CORS Handler]
-        HELMET[Security Headers]
-        RATE[Rate Limiting]
-        AUTH_GUARD[JWT Auth Guard]
-        ROLE_GUARD[Role Guard]
-        TENANT_GUARD[Tenant Guard]
-        VALIDATION[Input Validation]
-        LOGGING[Request Logging]
-    end
+    INVOICE {
+        string id PK
+        string subscriptionId FK
+        string tenantId FK
+        string invoiceNumber
+        enum status
+        decimal subtotal
+        decimal taxAmount
+        decimal total
+        datetime dueDate
+        json lineItems
+    }
     
-    subgraph "Controllers"
-        AUTH_CTRL[Auth Controller]
-        SCHOOL_CTRL[School Controller]
-        SCHEDULE_CTRL[Schedule Controller]
-        NOTIFY_CTRL[Notification Controller]
-    end
+    PAYMENT {
+        string id PK
+        string subscriptionId FK
+        string invoiceId FK
+        string tenantId FK
+        decimal amount
+        enum status
+        string paymentMethod
+        string stripePaymentId
+    }
     
-    AUTH_API --> CORS
-    SCHOOL_API --> CORS
-    SCHEDULE_API --> CORS
-    NOTIFY_API --> CORS
+    NOTIFICATION_TEMPLATE {
+        string id PK
+        string tenantId FK
+        string name
+        enum type
+        string subject
+        string content
+        json variables
+        boolean isActive
+        boolean isSystem
+    }
     
-    CORS --> HELMET
-    HELMET --> RATE
-    RATE --> AUTH_GUARD
-    AUTH_GUARD --> ROLE_GUARD
-    ROLE_GUARD --> TENANT_GUARD
-    TENANT_GUARD --> VALIDATION
-    VALIDATION --> LOGGING
+    NOTIFICATION {
+        string id PK
+        string tenantId FK
+        string templateId FK
+        string recipientId FK
+        enum type
+        enum priority
+        enum status
+        string subject
+        string content
+        datetime scheduledFor
+        datetime sentAt
+        datetime readAt
+    }
     
-    LOGGING --> AUTH_CTRL
-    LOGGING --> SCHOOL_CTRL
-    LOGGING --> SCHEDULE_CTRL
-    LOGGING --> NOTIFY_CTRL
-```
-
-### **Authentication Flow**
-
-```mermaid
-sequenceDiagram
-    participant Client
-    participant API
-    participant AuthService
-    participant Database
-    participant JWT
-    
-    Client->>API: POST /auth/login
-    API->>AuthService: validateCredentials()
-    AuthService->>Database: findUser(email)
-    Database-->>AuthService: user data
-    AuthService->>AuthService: verifyPassword()
-    AuthService->>JWT: generateTokens()
-    JWT-->>AuthService: access + refresh tokens
-    AuthService-->>API: tokens + user data
-    API-->>Client: 200 + tokens
-    
-    Note over Client,JWT: Subsequent requests
-    Client->>API: GET /schools (with JWT)
-    API->>JWT: verifyToken()
-    JWT-->>API: decoded payload
-    API->>API: checkPermissions()
-    API-->>Client: 200 + data
-```
-
----
-
-## 🧠 **Scheduling Engine**
-
-### **Constraint Programming Architecture**
-
-```mermaid
-graph TB
-    subgraph "Scheduling Request"
-        INPUT[Scheduling Input]
-        TEACHERS[Teachers]
-        ROOMS[Rooms]
-        SUBJECTS[Subjects]
-        CLASSES[Classes]
-        TIMESLOTS[Time Slots]
-        PREFERENCES[Preferences]
-    end
-    
-    subgraph "Constraint Engine"
-        HARD_CONSTRAINTS[Hard Constraints]
-        SOFT_CONSTRAINTS[Soft Constraints]
-        VALIDATOR[Constraint Validator]
-    end
-    
-    subgraph "OR-Tools Integration"
-        CPSAT[CP-SAT Solver]
-        PYTHON[Python Script]
-        HEURISTIC[Heuristic Fallback]
-    end
-    
-    subgraph "Output Processing"
-        SOLUTION[Solution Parser]
-        CONFLICTS[Conflict Detector]
-        OPTIMIZER[Score Calculator]
-        EXPORT[Export Generator]
-    end
-    
-    INPUT --> HARD_CONSTRAINTS
-    INPUT --> SOFT_CONSTRAINTS
-    TEACHERS --> HARD_CONSTRAINTS
-    ROOMS --> HARD_CONSTRAINTS
-    SUBJECTS --> HARD_CONSTRAINTS
-    CLASSES --> HARD_CONSTRAINTS
-    TIMESLOTS --> HARD_CONSTRAINTS
-    PREFERENCES --> SOFT_CONSTRAINTS
-    
-    HARD_CONSTRAINTS --> VALIDATOR
-    SOFT_CONSTRAINTS --> VALIDATOR
-    VALIDATOR --> CPSAT
-    CPSAT --> PYTHON
-    PYTHON --> HEURISTIC
-    
-    PYTHON --> SOLUTION
-    SOLUTION --> CONFLICTS
-    SOLUTION --> OPTIMIZER
-    SOLUTION --> EXPORT
-```
-
-### **Constraint Types**
-
-```mermaid
-graph LR
-    subgraph "Hard Constraints (Must Satisfy)"
-        HC1[Teacher Conflict]
-        HC2[Room Conflict]
-        HC3[Class Conflict]
-        HC4[Teacher Availability]
-        HC5[Room Capacity]
-        HC6[Time Slot Validity]
-    end
-    
-    subgraph "Soft Constraints (Optimization)"
-        SC1[Teacher Preferences]
-        SC2[Room Preferences]
-        SC3[Workload Distribution]
-        SC4[Time Preferences]
-        SC5[Subject Preferences]
-        SC6[Consecutive Periods]
-    end
-    
-    subgraph "Solver Decision"
-        FEASIBLE{Feasible Solution?}
-        OPTIMAL[Optimize Soft Constraints]
-        INFEASIBLE[Report Conflicts]
-    end
-    
-    HC1 --> FEASIBLE
-    HC2 --> FEASIBLE
-    HC3 --> FEASIBLE
-    HC4 --> FEASIBLE
-    HC5 --> FEASIBLE
-    HC6 --> FEASIBLE
-    
-    FEASIBLE -->|Yes| OPTIMAL
-    FEASIBLE -->|No| INFEASIBLE
-    
-    SC1 --> OPTIMAL
-    SC2 --> OPTIMAL
-    SC3 --> OPTIMAL
-    SC4 --> OPTIMAL
-    SC5 --> OPTIMAL
-    SC6 --> OPTIMAL
-```
-
-### **Background Job Processing**
-
-```mermaid
-sequenceDiagram
-    participant Client
-    participant API
-    participant Queue
-    participant Worker
-    participant Solver
-    participant Database
-    
-    Client->>API: POST /schedules/generate
-    API->>Queue: addJob(scheduleRequest)
-    Queue-->>API: jobId
-    API-->>Client: 202 + jobId
-    
-    Queue->>Worker: processJob()
-    Worker->>Solver: solve(constraints)
-    Solver->>Solver: CP-SAT Processing
-    Solver-->>Worker: solution
-    Worker->>Database: saveSchedule()
-    Worker->>Queue: updateProgress(100%)
-    
-    Client->>API: GET /schedules/job/:jobId
-    API->>Queue: getJobStatus()
-    Queue-->>API: status + result
-    API-->>Client: 200 + schedule
-```
-
----
-
-## 📢 **Notification System**
-
-### **Multi-Channel Architecture (Current Implementation - 70% Complete)**
-
-```mermaid
-graph TB
-    subgraph "API Layer"
-        REST_ENDPOINTS[10 REST Endpoints]
-        DTO_VALIDATION[DTO Validation]
-        JWT_AUTH[JWT Authentication]
-        RATE_LIMITING[Rate Limiting]
-    end
-    
-    subgraph "Service Layer - IMPLEMENTED ✅"
-        NOTIFICATION_SERVICE[NotificationService]
-        EMAIL_SERVICE[EmailService - Dual Provider]
-        WEBSOCKET_GATEWAY[WebSocketGateway]
-        NOTIFICATION_PROCESSOR[NotificationProcessor]
-    end
-    
-    subgraph "Queue System - IMPLEMENTED ✅"
-        BULL_QUEUE[(Bull Queue + Redis)]
-        PRIORITY_PROCESSING[Priority Processing]
-        RETRY_LOGIC[Retry Logic - 3 attempts]
-        ERROR_HANDLING[Error Handling]
-    end
-    
-    subgraph "Delivery Channels"
-        EMAIL_DUAL[Email - Dual Provider ✅]
-        WEBSOCKET_REALTIME[WebSocket - Real-time ✅]
-        SMS_SERVICE[SMS Service - TODO 🔄]
-        PUSH_SERVICE[Push Notifications - TODO 🔄]
-    end
-    
-    subgraph "External Integrations"
-        SENDGRID[SendGrid API ✅]
-        SMTP_SERVER[SMTP Fallback ✅]
-        SOCKET_IO[Socket.io ✅]
-        TWILIO[Twilio - Pending 🔄]
-        FCM[Firebase FCM - Pending 🔄]
-    end
-    
-    subgraph "Database Layer - IMPLEMENTED ✅"
-        NOTIFICATION_RECORDS[(Notification Records)]
-        DELIVERY_STATUS[Delivery Status Tracking]
-        AUDIT_LOGS[Audit Logs]
-        PRISMA_ORM[Prisma ORM]
-    end
-    
-    REST_ENDPOINTS --> DTO_VALIDATION
-    DTO_VALIDATION --> JWT_AUTH
-    JWT_AUTH --> RATE_LIMITING
-    RATE_LIMITING --> NOTIFICATION_SERVICE
-    
-    NOTIFICATION_SERVICE --> EMAIL_SERVICE
-    NOTIFICATION_SERVICE --> WEBSOCKET_GATEWAY
-    NOTIFICATION_SERVICE --> BULL_QUEUE
-    NOTIFICATION_SERVICE --> PRISMA_ORM
-    
-    BULL_QUEUE --> PRIORITY_PROCESSING
-    PRIORITY_PROCESSING --> NOTIFICATION_PROCESSOR
-    NOTIFICATION_PROCESSOR --> RETRY_LOGIC
-    RETRY_LOGIC --> ERROR_HANDLING
-    
-    NOTIFICATION_PROCESSOR --> EMAIL_DUAL
-    NOTIFICATION_PROCESSOR --> WEBSOCKET_REALTIME
-    NOTIFICATION_PROCESSOR --> SMS_SERVICE
-    NOTIFICATION_PROCESSOR --> PUSH_SERVICE
-    
-    EMAIL_DUAL --> SENDGRID
-    EMAIL_DUAL --> SMTP_SERVER
-    WEBSOCKET_REALTIME --> SOCKET_IO
-    SMS_SERVICE -.-> TWILIO
-    PUSH_SERVICE -.-> FCM
-    
-    NOTIFICATION_SERVICE --> NOTIFICATION_RECORDS
-    NOTIFICATION_RECORDS --> DELIVERY_STATUS
-    DELIVERY_STATUS --> AUDIT_LOGS
-    
-    style EMAIL_DUAL fill:#90EE90
-    style WEBSOCKET_REALTIME fill:#90EE90
-    style SENDGRID fill:#90EE90
-    style SMTP_SERVER fill:#90EE90
-    style SOCKET_IO fill:#90EE90
-    style NOTIFICATION_RECORDS fill:#90EE90
-    style SMS_SERVICE fill:#FFE4B5
-    style PUSH_SERVICE fill:#FFE4B5
-    style TWILIO fill:#FFB6C1
-    style FCM fill:#FFB6C1
-```
-
-### **Real-time WebSocket Architecture**
-
-```mermaid
-graph TB
-    subgraph "Client Connections"
-        WEB_CLIENT[Web Client]
-        MOBILE_CLIENT[Mobile Client]
-        ADMIN_CLIENT[Admin Client]
-    end
-    
-    subgraph "WebSocket Gateway"
-        WS_GATEWAY[Socket.io Gateway]
-        AUTH_WS[JWT Authentication]
-        ROOM_MANAGER[Room Manager]
-        CONNECTION_POOL[Connection Pool]
-    end
-    
-    subgraph "Notification Distribution"
-        USER_TARGETING[User Targeting]
-        ROOM_BROADCAST[Room Broadcast]
-        GLOBAL_BROADCAST[Global Broadcast]
-    end
-    
-    subgraph "Message Types"
-        SCHEDULE_NOTIFY[Schedule Notifications]
-        SYSTEM_ALERTS[System Alerts]
-        CHAT_MESSAGES[Chat Messages]
-        STATUS_UPDATES[Status Updates]
-    end
-    
-    WEB_CLIENT --> WS_GATEWAY
-    MOBILE_CLIENT --> WS_GATEWAY
-    ADMIN_CLIENT --> WS_GATEWAY
-    
-    WS_GATEWAY --> AUTH_WS
-    AUTH_WS --> ROOM_MANAGER
-    ROOM_MANAGER --> CONNECTION_POOL
-    
-    CONNECTION_POOL --> USER_TARGETING
-    CONNECTION_POOL --> ROOM_BROADCAST
-    CONNECTION_POOL --> GLOBAL_BROADCAST
-    
-    USER_TARGETING --> SCHEDULE_NOTIFY
-    ROOM_BROADCAST --> SYSTEM_ALERTS
-    GLOBAL_BROADCAST --> STATUS_UPDATES
-```
-
----
-
-## 🔒 **Security Architecture**
-
-### **Authentication & Authorization**
-
-```mermaid
-graph TB
-    subgraph "Authentication Layer"
-        LOGIN[Login Endpoint]
-        JWT_SERVICE[JWT Service]
-        REFRESH[Refresh Token]
-        LOGOUT[Logout]
-    end
-    
-    subgraph "Authorization Layer"
-        ROLE_GUARD[Role-based Guard]
-        TENANT_GUARD[Tenant Isolation]
-        RESOURCE_GUARD[Resource Guard]
-        PERMISSION_CHECK[Permission Check]
-    end
-    
-    subgraph "Security Middleware"
-        RATE_LIMITER[Rate Limiting]
-        CORS_HANDLER[CORS Handler]
-        HELMET_SECURITY[Security Headers]
-        INPUT_VALIDATION[Input Validation]
-    end
-    
-    subgraph "Data Protection"
-        ENCRYPTION[Data Encryption]
-        HASHING[Password Hashing]
-        SANITIZATION[Input Sanitization]
-        AUDIT_LOG[Audit Logging]
-    end
-    
-    LOGIN --> JWT_SERVICE
-    JWT_SERVICE --> REFRESH
-    JWT_SERVICE --> ROLE_GUARD
-    
-    ROLE_GUARD --> TENANT_GUARD
-    TENANT_GUARD --> RESOURCE_GUARD
-    RESOURCE_GUARD --> PERMISSION_CHECK
-    
-    RATE_LIMITER --> CORS_HANDLER
-    CORS_HANDLER --> HELMET_SECURITY
-    HELMET_SECURITY --> INPUT_VALIDATION
-    
-    INPUT_VALIDATION --> ENCRYPTION
-    ENCRYPTION --> HASHING
-    HASHING --> SANITIZATION
-    SANITIZATION --> AUDIT_LOG
-```
-
-### **Multi-Tenant Security**
-
-```mermaid
-graph LR
-    subgraph "Request Flow"
-        REQUEST[Incoming Request]
-        JWT_TOKEN[JWT Token]
-        TENANT_ID[Tenant ID]
-    end
-    
-    subgraph "Tenant Isolation"
-        TENANT_GUARD[Tenant Guard]
-        DATA_FILTER[Data Filtering]
-        QUERY_MODIFIER[Query Modifier]
-    end
-    
-    subgraph "Database Access"
-        PRISMA_FILTER[Prisma Filter]
-        ROW_LEVEL[Row-Level Security]
-        TENANT_SCOPE[Tenant Scoping]
-    end
-    
-    REQUEST --> JWT_TOKEN
-    JWT_TOKEN --> TENANT_ID
-    TENANT_ID --> TENANT_GUARD
-    
-    TENANT_GUARD --> DATA_FILTER
-    DATA_FILTER --> QUERY_MODIFIER
-    QUERY_MODIFIER --> PRISMA_FILTER
-    
-    PRISMA_FILTER --> ROW_LEVEL
-    ROW_LEVEL --> TENANT_SCOPE
+    NOTIFICATION_PREFERENCE {
+        string id PK
+        string userId FK
+        string tenantId FK
+        enum notificationType
+        enum templateType
+        boolean isEnabled
+        json deliveryChannels
+        string quietHoursStart
+        string quietHoursEnd
+        string timezone
+    }
 ```
 
 ---
 
 ## 💳 **Billing System Architecture**
 
-### **Payment Processing Flow (Planned Implementation)**
+### **Billing Service Layer**
 
 ```mermaid
 graph TB
     subgraph "Billing API Layer"
-        BILLING_ENDPOINTS[Billing REST Endpoints]
-        SUBSCRIPTION_API[Subscription Management]
-        INVOICE_API[Invoice Generation]
-        PAYMENT_API[Payment Processing]
+        BILLING_CTRL[Billing Controller]
+        SUB_CTRL[Subscription Controller]
     end
-    
-    subgraph "Billing Services - TODO 🔄"
-        BILLING_SERVICE[BillingService]
-        STRIPE_SERVICE[StripeService]
-        INVOICE_SERVICE[InvoiceService]
-        SUBSCRIPTION_SERVICE[SubscriptionService]
+
+    subgraph "Billing Service Layer"
+        BILLING_SVC[Billing Service]
+        SUB_SVC[Subscription Service]
+        INVOICE_SVC[Invoice Service]
+        STRIPE_SVC[Stripe Service]
     end
-    
-    subgraph "Payment Processing"
-        STRIPE_INTEGRATION[Stripe Integration]
-        WEBHOOK_HANDLER[Webhook Handler]
-        PAYMENT_VALIDATION[Payment Validation]
-        REFUND_PROCESSING[Refund Processing]
+
+    subgraph "Billing Data Layer"
+        PLAN_MODEL[BillingPlan Model]
+        SUB_MODEL[Subscription Model]
+        INVOICE_MODEL[Invoice Model]
+        PAYMENT_MODEL[Payment Model]
+        USAGE_MODEL[UsageMetric Model]
     end
-    
-    subgraph "Invoice Management"
-        PDF_GENERATOR[PDF Generator]
-        EMAIL_DELIVERY[Email Delivery]
-        INVOICE_STORAGE[Invoice Storage]
-        TAX_CALCULATION[Tax Calculation]
+
+    subgraph "External Integration"
+        STRIPE_API[Stripe API]
+        PDF_GEN[PDF Generator]
+        EMAIL_SVC[Email Service]
     end
+
+    BILLING_CTRL --> BILLING_SVC
+    SUB_CTRL --> SUB_SVC
     
-    subgraph "Subscription Management"
-        PLAN_MANAGEMENT[Plan Management]
-        USAGE_TRACKING[Usage Tracking]
-        BILLING_CYCLES[Billing Cycles]
-        PRORATION[Proration Logic]
-    end
+    BILLING_SVC --> PLAN_MODEL
+    SUB_SVC --> SUB_MODEL
+    SUB_SVC --> USAGE_MODEL
+    SUB_SVC --> STRIPE_SVC
     
-    subgraph "Database Layer"
-        BILLING_RECORDS[(Billing Records)]
-        SUBSCRIPTION_DATA[(Subscription Data)]
-        INVOICE_DATA[(Invoice Data)]
-        PAYMENT_HISTORY[(Payment History)]
-    end
+    INVOICE_SVC --> INVOICE_MODEL
+    INVOICE_SVC --> PAYMENT_MODEL
+    INVOICE_SVC --> PDF_GEN
+    INVOICE_SVC --> EMAIL_SVC
     
-    BILLING_ENDPOINTS --> BILLING_SERVICE
-    SUBSCRIPTION_API --> SUBSCRIPTION_SERVICE
-    INVOICE_API --> INVOICE_SERVICE
-    PAYMENT_API --> STRIPE_SERVICE
-    
-    BILLING_SERVICE --> STRIPE_INTEGRATION
-    STRIPE_SERVICE --> STRIPE_INTEGRATION
-    STRIPE_INTEGRATION --> WEBHOOK_HANDLER
-    WEBHOOK_HANDLER --> PAYMENT_VALIDATION
-    
-    INVOICE_SERVICE --> PDF_GENERATOR
-    PDF_GENERATOR --> EMAIL_DELIVERY
-    INVOICE_SERVICE --> INVOICE_STORAGE
-    INVOICE_SERVICE --> TAX_CALCULATION
-    
-    SUBSCRIPTION_SERVICE --> PLAN_MANAGEMENT
-    SUBSCRIPTION_SERVICE --> USAGE_TRACKING
-    SUBSCRIPTION_SERVICE --> BILLING_CYCLES
-    SUBSCRIPTION_SERVICE --> PRORATION
-    
-    BILLING_SERVICE --> BILLING_RECORDS
-    SUBSCRIPTION_SERVICE --> SUBSCRIPTION_DATA
-    INVOICE_SERVICE --> INVOICE_DATA
-    STRIPE_SERVICE --> PAYMENT_HISTORY
-    
-    style BILLING_SERVICE fill:#FFE4B5
-    style STRIPE_SERVICE fill:#FFE4B5
-    style INVOICE_SERVICE fill:#FFE4B5
-    style SUBSCRIPTION_SERVICE fill:#FFE4B5
-    style STRIPE_INTEGRATION fill:#FFB6C1
-    style PDF_GENERATOR fill:#FFB6C1
+    STRIPE_SVC --> STRIPE_API
 ```
 
-### **Subscription Lifecycle**
+### **Subscription Lifecycle Flow**
 
 ```mermaid
 sequenceDiagram
     participant Client
-    participant BillingAPI
+    participant API
+    participant SubService
     participant StripeService
+    participant Database
     participant Stripe
-    participant WebhookHandler
-    participant NotificationService
-    
-    Client->>BillingAPI: POST /subscriptions/create
-    BillingAPI->>StripeService: createSubscription()
-    StripeService->>Stripe: Create Customer & Subscription
-    Stripe-->>StripeService: Subscription Created
-    StripeService-->>BillingAPI: Subscription Data
-    BillingAPI-->>Client: 201 + Subscription Details
-    
-    Note over Stripe,WebhookHandler: Payment Processing
-    Stripe->>WebhookHandler: invoice.payment_succeeded
-    WebhookHandler->>BillingAPI: updateSubscriptionStatus()
-    BillingAPI->>NotificationService: sendPaymentConfirmation()
-    
-    Note over Stripe,WebhookHandler: Payment Failed
-    Stripe->>WebhookHandler: invoice.payment_failed
-    WebhookHandler->>BillingAPI: handlePaymentFailure()
-    BillingAPI->>NotificationService: sendPaymentFailureAlert()
+
+    Client->>API: POST /subscriptions
+    API->>SubService: createSubscription()
+    SubService->>Database: Validate plan & school
+    SubService->>StripeService: createCustomer()
+    StripeService->>Stripe: Create customer
+    Stripe-->>StripeService: Customer ID
+    SubService->>StripeService: createSubscription()
+    StripeService->>Stripe: Create subscription
+    Stripe-->>StripeService: Subscription ID
+    SubService->>Database: Save subscription
+    Database-->>SubService: Subscription created
+    SubService-->>API: Subscription response
+    API-->>Client: 201 Created
 ```
+
+### **Proration Calculation Flow**
+
+```mermaid
+graph LR
+    START[Plan Change Request] --> VALIDATE[Validate New Plan]
+    VALIDATE --> CALC_DAYS[Calculate Remaining Days]
+    CALC_DAYS --> CALC_UNUSED[Calculate Unused Amount]
+    CALC_UNUSED --> CALC_NEW[Calculate New Amount]
+    CALC_NEW --> PRORATION[Proration = New - Unused]
+    PRORATION --> UPDATE_STRIPE[Update Stripe Subscription]
+    UPDATE_STRIPE --> UPDATE_DB[Update Database]
+    UPDATE_DB --> RESPONSE[Return Proration Details]
+```
+
+---
+
+## 📱 **Notification System Architecture**
+
+### **Notification Service Layer**
+
+```mermaid
+graph TB
+    subgraph "Notification API Layer"
+        NOTIF_CTRL[Notification Controller]
+        HISTORY_CTRL[History Endpoints]
+        PREF_CTRL[Preference Endpoints]
+    end
+
+    subgraph "Notification Service Layer"
+        NOTIF_SVC[Notification Service]
+        HISTORY_SVC[History Service]
+        PREF_SVC[Preference Service]
+        TEMPLATE_SVC[Template Service]
+    end
+
+    subgraph "Delivery Services"
+        EMAIL_SVC[Email Service]
+        SMS_SVC[SMS Service]
+        PUSH_SVC[Push Service]
+        WS_SVC[WebSocket Service]
+    end
+
+    subgraph "Background Processing"
+        QUEUE[Bull Queue]
+        PROCESSOR[Notification Processor]
+    end
+
+    subgraph "Data Layer"
+        NOTIF_MODEL[Notification Model]
+        TEMPLATE_MODEL[Template Model]
+        PREF_MODEL[Preference Model]
+    end
+
+    subgraph "External Services"
+        SENDGRID[SendGrid]
+        TWILIO[Twilio]
+        FIREBASE[Firebase FCM]
+    end
+
+    NOTIF_CTRL --> NOTIF_SVC
+    HISTORY_CTRL --> HISTORY_SVC
+    PREF_CTRL --> PREF_SVC
+    
+    NOTIF_SVC --> QUEUE
+    QUEUE --> PROCESSOR
+    
+    PROCESSOR --> EMAIL_SVC
+    PROCESSOR --> SMS_SVC
+    PROCESSOR --> PUSH_SVC
+    PROCESSOR --> WS_SVC
+    
+    EMAIL_SVC --> SENDGRID
+    SMS_SVC --> TWILIO
+    PUSH_SVC --> FIREBASE
+    
+    HISTORY_SVC --> NOTIF_MODEL
+    PREF_SVC --> PREF_MODEL
+    TEMPLATE_SVC --> TEMPLATE_MODEL
+```
+
+### **Notification Delivery Flow**
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant NotifService
+    participant PrefService
+    participant Queue
+    participant Processor
+    participant DeliveryService
+    participant External
+
+    Client->>API: POST /notifications/send
+    API->>NotifService: sendNotification()
+    NotifService->>PrefService: shouldReceiveNotification()
+    PrefService-->>NotifService: Eligibility check
+    
+    alt User eligible
+        NotifService->>Queue: Add to queue
+        Queue->>Processor: Process notification
+        Processor->>DeliveryService: Deliver via channel
+        DeliveryService->>External: Send notification
+        External-->>DeliveryService: Delivery status
+        DeliveryService->>Processor: Update status
+        Processor->>NotifService: Update database
+    else User not eligible
+        NotifService-->>API: Skip notification
+    end
+    
+    API-->>Client: Response
+```
+
+### **Preference Management Flow**
+
+```mermaid
+graph LR
+    USER_REQ[User Request] --> CHECK_QUIET[Check Quiet Hours]
+    CHECK_QUIET --> CHECK_ENABLED[Check If Enabled]
+    CHECK_ENABLED --> CHECK_CHANNEL[Check Delivery Channel]
+    CHECK_CHANNEL --> DECISION{Should Receive?}
+    
+    DECISION -->|Yes| ALLOW[Allow Notification]
+    DECISION -->|No| BLOCK[Block Notification]
+    
+    ALLOW --> DELIVER[Deliver Notification]
+    BLOCK --> LOG[Log Reason]
+```
+
+---
+
+## 🔌 **API Layer Architecture**
+
+### **Controller Structure**
+
+```mermaid
+graph TB
+    subgraph "Authentication Layer"
+        JWT_GUARD[JWT Auth Guard]
+        ROLES_GUARD[Roles Guard]
+        RATE_LIMIT[Rate Limiting]
+    end
+
+    subgraph "Controller Layer"
+        AUTH_CTRL[Auth Controller]
+        BILLING_CTRL[Billing Controller]
+        NOTIF_CTRL[Notification Controller]
+        SCHEDULE_CTRL[Scheduling Controller]
+    end
+
+    subgraph "Service Layer"
+        AUTH_SVC[Auth Service]
+        BILLING_SVC[Billing Service]
+        NOTIF_SVC[Notification Service]
+        SCHEDULE_SVC[Scheduling Service]
+    end
+
+    subgraph "Data Access Layer"
+        PRISMA[Prisma ORM]
+        POSTGRES[(PostgreSQL)]
+    end
+
+    JWT_GUARD --> ROLES_GUARD
+    ROLES_GUARD --> RATE_LIMIT
+    RATE_LIMIT --> AUTH_CTRL
+    RATE_LIMIT --> BILLING_CTRL
+    RATE_LIMIT --> NOTIF_CTRL
+    RATE_LIMIT --> SCHEDULE_CTRL
+
+    AUTH_CTRL --> AUTH_SVC
+    BILLING_CTRL --> BILLING_SVC
+    NOTIF_CTRL --> NOTIF_SVC
+    SCHEDULE_CTRL --> SCHEDULE_SVC
+
+    AUTH_SVC --> PRISMA
+    BILLING_SVC --> PRISMA
+    NOTIF_SVC --> PRISMA
+    SCHEDULE_SVC --> PRISMA
+
+    PRISMA --> POSTGRES
+```
+
+### **API Endpoint Organization**
+
+```
+/api/v1/
+├── auth/
+│   ├── login
+│   ├── register
+│   ├── refresh
+│   └── logout
+├── billing/
+│   ├── subscriptions/
+│   ├── payments/
+│   ├── invoices/
+│   ├── plans/
+│   └── analytics/
+├── notifications/
+│   ├── send
+│   ├── history/
+│   ├── preferences/
+│   ├── templates/
+│   └── admin/
+├── scheduling/
+│   ├── schedules/
+│   ├── sessions/
+│   ├── constraints/
+│   └── analytics/
+└── analytics/
+    ├── dashboard
+    ├── usage
+    └── reports
+```
+
+---
+
+## 📊 **Data Flow Diagrams**
+
+### **Billing Data Flow**
+
+```mermaid
+graph LR
+    subgraph "Input"
+        PLAN_CREATE[Create Plan]
+        SUB_CREATE[Create Subscription]
+        USAGE_TRACK[Track Usage]
+    end
+
+    subgraph "Processing"
+        VALIDATE[Validate Data]
+        CALCULATE[Calculate Billing]
+        GENERATE[Generate Invoice]
+        PROCESS[Process Payment]
+    end
+
+    subgraph "Output"
+        INVOICE[Invoice Generated]
+        PAYMENT[Payment Processed]
+        ANALYTICS[Analytics Updated]
+    end
+
+    PLAN_CREATE --> VALIDATE
+    SUB_CREATE --> VALIDATE
+    USAGE_TRACK --> CALCULATE
+    
+    VALIDATE --> CALCULATE
+    CALCULATE --> GENERATE
+    GENERATE --> PROCESS
+    
+    PROCESS --> INVOICE
+    PROCESS --> PAYMENT
+    PROCESS --> ANALYTICS
+```
+
+### **Notification Data Flow**
+
+```mermaid
+graph LR
+    subgraph "Trigger"
+        EVENT[System Event]
+        MANUAL[Manual Send]
+        SCHEDULED[Scheduled Send]
+    end
+
+    subgraph "Processing"
+        TEMPLATE[Apply Template]
+        PREFERENCE[Check Preferences]
+        QUEUE[Add to Queue]
+        DELIVER[Deliver Notification]
+    end
+
+    subgraph "Tracking"
+        STATUS[Update Status]
+        ANALYTICS[Update Analytics]
+        HISTORY[Store History]
+    end
+
+    EVENT --> TEMPLATE
+    MANUAL --> TEMPLATE
+    SCHEDULED --> TEMPLATE
+    
+    TEMPLATE --> PREFERENCE
+    PREFERENCE --> QUEUE
+    QUEUE --> DELIVER
+    
+    DELIVER --> STATUS
+    STATUS --> ANALYTICS
+    STATUS --> HISTORY
+```
+
+---
+
+## 🔒 **Security Architecture**
+
+### **Authentication & Authorization Flow**
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant AuthGuard
+    participant AuthService
+    participant Database
+
+    Client->>API: Request with JWT
+    API->>AuthGuard: Validate token
+    AuthGuard->>AuthService: Verify JWT
+    AuthService->>Database: Check user status
+    Database-->>AuthService: User data
+    AuthService-->>AuthGuard: User context
+    AuthGuard->>API: Authorized request
+    API->>Client: Response
+```
+
+### **Multi-tenant Security**
+
+```mermaid
+graph TB
+    REQUEST[Incoming Request] --> JWT_VALIDATE[Validate JWT]
+    JWT_VALIDATE --> EXTRACT_TENANT[Extract Tenant ID]
+    EXTRACT_TENANT --> SCOPE_QUERY[Scope Database Query]
+    SCOPE_QUERY --> VALIDATE_ACCESS[Validate Resource Access]
+    VALIDATE_ACCESS --> PROCESS[Process Request]
+    PROCESS --> RESPONSE[Return Response]
+```
+
+### **Security Layers**
+
+1. **Network Security**
+   - HTTPS/TLS encryption
+   - CORS configuration
+   - Rate limiting
+
+2. **Authentication Security**
+   - JWT tokens with expiration
+   - Refresh token rotation
+   - Password hashing (bcrypt)
+
+3. **Authorization Security**
+   - Role-based access control
+   - Resource-level permissions
+   - Multi-tenant isolation
+
+4. **Data Security**
+   - Input validation
+   - SQL injection prevention
+   - XSS protection
 
 ---
 
 ## 🚀 **Deployment Architecture**
 
-### **Production Deployment**
-
-```mermaid
-graph TB
-    subgraph "Load Balancer"
-        LB[NGINX Load Balancer]
-        SSL[SSL Termination]
-    end
-    
-    subgraph "Application Tier"
-        APP1[NestJS Instance 1]
-        APP2[NestJS Instance 2]
-        APP3[NestJS Instance 3]
-    end
-    
-    subgraph "Database Tier"
-        PRIMARY[(PostgreSQL Primary)]
-        REPLICA[(PostgreSQL Replica)]
-        REDIS_CLUSTER[(Redis Cluster)]
-    end
-    
-    subgraph "Background Services"
-        QUEUE_WORKER1[Queue Worker 1]
-        QUEUE_WORKER2[Queue Worker 2]
-        SCHEDULER[Cron Scheduler]
-    end
-    
-    subgraph "External Services"
-        STRIPE_API[Stripe API]
-        TWILIO_API[Twilio API]
-        SMTP_SERVICE[SMTP Service]
-    end
-    
-    subgraph "Monitoring"
-        LOGS[Centralized Logging]
-        METRICS[Metrics Collection]
-        ALERTS[Alert Manager]
-    end
-    
-    LB --> SSL
-    SSL --> APP1
-    SSL --> APP2
-    SSL --> APP3
-    
-    APP1 --> PRIMARY
-    APP2 --> PRIMARY
-    APP3 --> PRIMARY
-    
-    APP1 --> REPLICA
-    APP2 --> REPLICA
-    APP3 --> REPLICA
-    
-    APP1 --> REDIS_CLUSTER
-    APP2 --> REDIS_CLUSTER
-    APP3 --> REDIS_CLUSTER
-    
-    REDIS_CLUSTER --> QUEUE_WORKER1
-    REDIS_CLUSTER --> QUEUE_WORKER2
-    
-    APP1 --> STRIPE_API
-    APP1 --> TWILIO_API
-    APP1 --> SMTP_SERVICE
-    
-    APP1 --> LOGS
-    APP2 --> LOGS
-    APP3 --> LOGS
-    
-    LOGS --> METRICS
-    METRICS --> ALERTS
-```
-
 ### **Container Architecture**
 
 ```mermaid
 graph TB
-    subgraph "Docker Containers"
-        subgraph "Application"
-            APP_CONTAINER[NestJS App Container]
-            WORKER_CONTAINER[Queue Worker Container]
-        end
-        
-        subgraph "Databases"
-            POSTGRES_CONTAINER[PostgreSQL Container]
-            REDIS_CONTAINER[Redis Container]
-        end
-        
-        subgraph "Proxy"
-            NGINX_CONTAINER[NGINX Container]
-        end
+    subgraph "Load Balancer"
+        LB[Nginx Load Balancer]
     end
-    
-    subgraph "Docker Network"
-        INTERNAL_NETWORK[Internal Network]
-        EXTERNAL_NETWORK[External Network]
+
+    subgraph "Application Tier"
+        APP1[NestJS App Instance 1]
+        APP2[NestJS App Instance 2]
+        APP3[NestJS App Instance 3]
     end
-    
-    subgraph "Volumes"
-        DB_VOLUME[Database Volume]
-        LOG_VOLUME[Log Volume]
-        UPLOAD_VOLUME[Upload Volume]
+
+    subgraph "Data Tier"
+        POSTGRES[(PostgreSQL Primary)]
+        POSTGRES_REPLICA[(PostgreSQL Replica)]
+        REDIS[(Redis Cluster)]
     end
-    
-    NGINX_CONTAINER --> APP_CONTAINER
-    APP_CONTAINER --> POSTGRES_CONTAINER
-    APP_CONTAINER --> REDIS_CONTAINER
-    WORKER_CONTAINER --> REDIS_CONTAINER
-    
-    POSTGRES_CONTAINER --> DB_VOLUME
-    APP_CONTAINER --> LOG_VOLUME
-    APP_CONTAINER --> UPLOAD_VOLUME
-    
-    NGINX_CONTAINER -.-> EXTERNAL_NETWORK
-    APP_CONTAINER -.-> INTERNAL_NETWORK
-    POSTGRES_CONTAINER -.-> INTERNAL_NETWORK
-    REDIS_CONTAINER -.-> INTERNAL_NETWORK
+
+    subgraph "Monitoring"
+        PROMETHEUS[Prometheus]
+        GRAFANA[Grafana]
+        ALERTMANAGER[Alert Manager]
+    end
+
+    LB --> APP1
+    LB --> APP2
+    LB --> APP3
+
+    APP1 --> POSTGRES
+    APP2 --> POSTGRES
+    APP3 --> POSTGRES
+
+    APP1 --> REDIS
+    APP2 --> REDIS
+    APP3 --> REDIS
+
+    POSTGRES --> POSTGRES_REPLICA
+
+    PROMETHEUS --> APP1
+    PROMETHEUS --> APP2
+    PROMETHEUS --> APP3
+    PROMETHEUS --> POSTGRES
+    PROMETHEUS --> REDIS
+
+    GRAFANA --> PROMETHEUS
+    ALERTMANAGER --> PROMETHEUS
+```
+
+### **Kubernetes Deployment**
+
+```yaml
+# Simplified K8s architecture
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sasscolmng
+---
+# Application Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sasscolmng-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sasscolmng-backend
+  template:
+    spec:
+      containers:
+      - name: backend
+        image: sasscolmng/backend:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: database-secret
+              key: url
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: sasscolmng-service
+spec:
+  selector:
+    app: sasscolmng-backend
+  ports:
+  - port: 80
+    targetPort: 3000
+  type: LoadBalancer
 ```
 
 ---
 
-## 📊 **Performance Architecture**
+## 📈 **Performance Considerations**
 
-### **Caching Strategy**
+### **Scalability Patterns**
 
-```mermaid
-graph TB
-    subgraph "Cache Layers"
-        L1[Application Cache]
-        L2[Redis Cache]
-        L3[Database Cache]
-    end
-    
-    subgraph "Cache Types"
-        SESSION[Session Cache]
-        QUERY[Query Cache]
-        OBJECT[Object Cache]
-        PAGE[Page Cache]
-    end
-    
-    subgraph "Cache Policies"
-        TTL[Time-to-Live]
-        LRU[Least Recently Used]
-        INVALIDATION[Cache Invalidation]
-    end
-    
-    L1 --> SESSION
-    L2 --> QUERY
-    L2 --> OBJECT
-    L3 --> PAGE
-    
-    SESSION --> TTL
-    QUERY --> LRU
-    OBJECT --> INVALIDATION
-```
+1. **Horizontal Scaling**
+   - Stateless application design
+   - Load balancing across instances
+   - Database read replicas
 
-### **Scaling Strategy**
+2. **Caching Strategy**
+   - Redis for session storage
+   - Query result caching
+   - Static asset caching
 
-```mermaid
-graph LR
-    subgraph "Horizontal Scaling"
-        LOAD_BALANCER[Load Balancer]
-        APP_INSTANCES[Multiple App Instances]
-        WORKER_INSTANCES[Multiple Workers]
-    end
-    
-    subgraph "Vertical Scaling"
-        CPU_SCALING[CPU Scaling]
-        MEMORY_SCALING[Memory Scaling]
-        STORAGE_SCALING[Storage Scaling]
-    end
-    
-    subgraph "Database Scaling"
-        READ_REPLICAS[Read Replicas]
-        SHARDING[Database Sharding]
-        CONNECTION_POOLING[Connection Pooling]
-    end
-    
-    LOAD_BALANCER --> APP_INSTANCES
-    APP_INSTANCES --> WORKER_INSTANCES
-    
-    CPU_SCALING --> MEMORY_SCALING
-    MEMORY_SCALING --> STORAGE_SCALING
-    
-    READ_REPLICAS --> SHARDING
-    SHARDING --> CONNECTION_POOLING
-```
+3. **Background Processing**
+   - Bull Queue for async tasks
+   - Notification processing
+   - Report generation
+
+4. **Database Optimization**
+   - Proper indexing strategy
+   - Connection pooling
+   - Query optimization
+
+### **Monitoring & Observability**
+
+1. **Application Metrics**
+   - Request/response times
+   - Error rates
+   - Throughput metrics
+
+2. **Infrastructure Metrics**
+   - CPU/Memory usage
+   - Database performance
+   - Queue processing rates
+
+3. **Business Metrics**
+   - User engagement
+   - Billing metrics
+   - Notification delivery rates
 
 ---
 
-This architecture documentation provides a comprehensive overview of the system design, from high-level concepts to detailed implementation patterns. Each diagram illustrates key architectural decisions and their relationships within the overall system.
+This architecture documentation provides a comprehensive overview of the system design, ensuring maintainability, scalability, and security for the SaaS School Management Platform.
+

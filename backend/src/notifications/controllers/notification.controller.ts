@@ -1,13 +1,15 @@
 import {
   Controller,
-  Post,
   Get,
+  Post,
   Put,
   Delete,
   Body,
   Param,
   Query,
   UseGuards,
+  Request,
+  HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
@@ -21,13 +23,26 @@ import { EmailService } from '../services/email.service';
 import { SmsService } from '../services/sms.service';
 import { PushService } from '../services/push.service';
 import { WebSocketGateway } from '../services/websocket.gateway';
+import { NotificationHistoryService } from '../services/notification-history.service';
+import { NotificationPreferenceService } from '../services/notification-preference.service';
 import {
   CreateNotificationDto,
   BulkNotificationDto,
   CreateNotificationTemplateDto,
   UpdateNotificationTemplateDto,
+  NotificationHistoryQueryDto,
+  NotificationHistoryListResponseDto,
+  NotificationHistoryResponseDto,
+  MarkAsReadDto,
+  MarkAsReadResponseDto,
+  CreateNotificationPreferenceDto,
+  UpdateNotificationPreferenceDto,
+  NotificationPreferenceResponseDto,
+  BulkUpdatePreferencesDto,
+  NotificationPreferencesSummaryDto,
+  NotificationEligibilityDto,
 } from '../dto';
-import { UserRole } from '@prisma/client';
+import { UserRole, NotificationType, TemplateType } from '@prisma/client';
 
 @ApiTags('Notifications')
 @ApiBearerAuth()
@@ -40,6 +55,8 @@ export class NotificationController {
     private smsService: SmsService,
     private pushService: PushService,
     private webSocketGateway: WebSocketGateway,
+    private readonly notificationHistoryService: NotificationHistoryService,
+    private readonly notificationPreferenceService: NotificationPreferenceService,
   ) {}
 
   @Post('send')
@@ -352,5 +369,305 @@ export class NotificationController {
         connectedUsers: this.webSocketGateway.getConnectedUsersCount(),
       },
     };
+  }
+
+  // ============================================================================
+  // NOTIFICATION HISTORY ENDPOINTS
+  // ============================================================================
+
+  @Get('history')
+  @RateLimit('GENEROUS')
+  @ApiOperation({ summary: 'Get notification history' })
+  @ApiResponse({
+    status: 200,
+    description: 'Notification history retrieved successfully',
+    type: NotificationHistoryListResponseDto,
+  })
+  async getNotificationHistory(
+    @Request() req: any,
+    @Query() query: NotificationHistoryQueryDto,
+  ): Promise<NotificationHistoryListResponseDto> {
+    const { tenantId } = req.user;
+    return this.notificationHistoryService.getNotificationHistory(tenantId, query);
+  }
+
+  @Get('history/:id')
+  @RateLimit('GENEROUS')
+  @ApiOperation({ summary: 'Get notification by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Notification retrieved successfully',
+    type: NotificationHistoryResponseDto,
+  })
+  async getNotificationById(
+    @Request() req: any,
+    @Param('id') notificationId: string,
+  ): Promise<NotificationHistoryResponseDto> {
+    const { tenantId } = req.user;
+    return this.notificationHistoryService.getNotificationById(tenantId, notificationId);
+  }
+
+  @Put('history/:id/read')
+  @RateLimit('GENEROUS')
+  @ApiOperation({ summary: 'Mark notification as read' })
+  @ApiResponse({
+    status: 200,
+    description: 'Notification marked as read',
+    type: NotificationHistoryResponseDto,
+  })
+  async markNotificationAsRead(
+    @Request() req: any,
+    @Param('id') notificationId: string,
+  ): Promise<NotificationHistoryResponseDto> {
+    const { tenantId, userId } = req.user;
+    return this.notificationHistoryService.markAsRead(tenantId, notificationId, userId);
+  }
+
+  @Put('history/read')
+  @RateLimit('GENEROUS')
+  @ApiOperation({ summary: 'Mark multiple notifications as read' })
+  @ApiResponse({
+    status: 200,
+    description: 'Notifications marked as read',
+    type: MarkAsReadResponseDto,
+  })
+  async markMultipleAsRead(
+    @Request() req: any,
+    @Body() markAsReadDto: MarkAsReadDto,
+  ): Promise<MarkAsReadResponseDto> {
+    const { tenantId, userId } = req.user;
+    return this.notificationHistoryService.markMultipleAsRead(
+      tenantId,
+      markAsReadDto.notificationIds,
+      userId,
+    );
+  }
+
+  @Delete('history/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @RateLimit('STANDARD')
+  @ApiOperation({ summary: 'Delete notification from history' })
+  @ApiResponse({
+    status: 204,
+    description: 'Notification deleted successfully',
+  })
+  async deleteNotification(
+    @Request() req: any,
+    @Param('id') notificationId: string,
+  ): Promise<void> {
+    const { tenantId, userId } = req.user;
+    return this.notificationHistoryService.deleteNotification(tenantId, notificationId, userId);
+  }
+
+  @Get('history-stats')
+  @RateLimit('STANDARD')
+  @ApiOperation({ summary: 'Get notification statistics' })
+  @ApiResponse({
+    status: 200,
+    description: 'Notification statistics retrieved successfully',
+  })
+  async getNotificationHistoryStats(
+    @Request() req: any,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('groupBy') groupBy?: 'day' | 'week' | 'month',
+  ) {
+    const { tenantId, userId } = req.user;
+    return this.notificationHistoryService.getNotificationStats(tenantId, {
+      userId,
+      startDate,
+      endDate,
+      groupBy,
+    });
+  }
+
+  @Get('unread-count')
+  @RateLimit('GENEROUS')
+  @ApiOperation({ summary: 'Get unread notification count' })
+  @ApiResponse({
+    status: 200,
+    description: 'Unread count retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        count: { type: 'number', example: 5 },
+      },
+    },
+  })
+  async getUnreadCount(@Request() req: any): Promise<{ count: number }> {
+    const { tenantId, userId } = req.user;
+    const count = await this.notificationHistoryService.getUnreadCount(tenantId, userId);
+    return { count };
+  }
+
+  // ============================================================================
+  // NOTIFICATION PREFERENCES ENDPOINTS
+  // ============================================================================
+
+  @Get('preferences')
+  @RateLimit('GENEROUS')
+  @ApiOperation({ summary: 'Get user notification preferences' })
+  @ApiResponse({
+    status: 200,
+    description: 'Notification preferences retrieved successfully',
+    type: [NotificationPreferenceResponseDto],
+  })
+  async getUserPreferences(
+    @Request() req: any,
+    @Query('notificationType') notificationType?: NotificationType,
+    @Query('templateType') templateType?: TemplateType,
+  ): Promise<NotificationPreferenceResponseDto[]> {
+    const { tenantId, userId } = req.user;
+    return this.notificationPreferenceService.getUserPreferences(tenantId, userId, {
+      notificationType,
+      templateType,
+    });
+  }
+
+  @Post('preferences')
+  @RateLimit('STANDARD')
+  @ApiOperation({ summary: 'Create or update notification preference' })
+  @ApiResponse({
+    status: 201,
+    description: 'Notification preference created/updated successfully',
+    type: NotificationPreferenceResponseDto,
+  })
+  async createOrUpdatePreference(
+    @Request() req: any,
+    @Body() createDto: CreateNotificationPreferenceDto,
+  ): Promise<NotificationPreferenceResponseDto> {
+    const { tenantId, userId } = req.user;
+    return this.notificationPreferenceService.createOrUpdatePreference(tenantId, userId, createDto);
+  }
+
+  @Put('preferences/:id')
+  @RateLimit('STANDARD')
+  @ApiOperation({ summary: 'Update notification preference' })
+  @ApiResponse({
+    status: 200,
+    description: 'Notification preference updated successfully',
+    type: NotificationPreferenceResponseDto,
+  })
+  async updatePreference(
+    @Request() req: any,
+    @Param('id') preferenceId: string,
+    @Body() updateDto: UpdateNotificationPreferenceDto,
+  ): Promise<NotificationPreferenceResponseDto> {
+    const { tenantId, userId } = req.user;
+    return this.notificationPreferenceService.updatePreference(
+      tenantId,
+      userId,
+      preferenceId,
+      updateDto,
+    );
+  }
+
+  @Put('preferences/bulk')
+  @RateLimit('STANDARD')
+  @ApiOperation({ summary: 'Bulk update notification preferences' })
+  @ApiResponse({
+    status: 200,
+    description: 'Notification preferences updated successfully',
+    type: [NotificationPreferenceResponseDto],
+  })
+  async bulkUpdatePreferences(
+    @Request() req: any,
+    @Body() bulkUpdateDto: BulkUpdatePreferencesDto,
+  ): Promise<NotificationPreferenceResponseDto[]> {
+    const { tenantId, userId } = req.user;
+    return this.notificationPreferenceService.bulkUpdatePreferences(tenantId, userId, bulkUpdateDto);
+  }
+
+  @Delete('preferences/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @RateLimit('STANDARD')
+  @ApiOperation({ summary: 'Delete notification preference' })
+  @ApiResponse({
+    status: 204,
+    description: 'Notification preference deleted successfully',
+  })
+  async deletePreference(
+    @Request() req: any,
+    @Param('id') preferenceId: string,
+  ): Promise<void> {
+    const { tenantId, userId } = req.user;
+    return this.notificationPreferenceService.deletePreference(tenantId, userId, preferenceId);
+  }
+
+  @Post('preferences/reset')
+  @RateLimit('STANDARD')
+  @ApiOperation({ summary: 'Reset preferences to defaults' })
+  @ApiResponse({
+    status: 200,
+    description: 'Preferences reset to defaults successfully',
+    type: [NotificationPreferenceResponseDto],
+  })
+  async resetToDefaults(@Request() req: any): Promise<NotificationPreferenceResponseDto[]> {
+    const { tenantId, userId } = req.user;
+    return this.notificationPreferenceService.resetToDefaults(tenantId, userId);
+  }
+
+  @Get('preferences/check-eligibility')
+  @RateLimit('GENEROUS')
+  @ApiOperation({ summary: 'Check if user should receive notification' })
+  @ApiResponse({
+    status: 200,
+    description: 'Notification eligibility checked successfully',
+    type: NotificationEligibilityDto,
+  })
+  async checkNotificationEligibility(
+    @Request() req: any,
+    @Query('notificationType') notificationType: NotificationType,
+    @Query('templateType') templateType?: TemplateType,
+    @Query('deliveryChannel') deliveryChannel?: string,
+  ): Promise<NotificationEligibilityDto> {
+    const { tenantId, userId } = req.user;
+    return this.notificationPreferenceService.shouldReceiveNotification(
+      tenantId,
+      userId,
+      notificationType,
+      templateType,
+      deliveryChannel,
+    );
+  }
+
+  // ============================================================================
+  // ADMIN ENDPOINTS (for tenant-wide statistics)
+  // ============================================================================
+
+  @Get('admin/stats')
+  @RateLimit('STANDARD')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
+  @ApiOperation({ summary: 'Get tenant-wide notification statistics (Admin only)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Tenant notification statistics retrieved successfully',
+  })
+  async getTenantNotificationStats(
+    @Request() req: any,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('groupBy') groupBy?: 'day' | 'week' | 'month',
+  ) {
+    const { tenantId } = req.user;
+    return this.notificationHistoryService.getNotificationStats(tenantId, {
+      startDate,
+      endDate,
+      groupBy,
+    });
+  }
+
+  @Get('admin/preferences-summary')
+  @RateLimit('STANDARD')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
+  @ApiOperation({ summary: 'Get tenant preferences summary (Admin only)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Tenant preferences summary retrieved successfully',
+    type: NotificationPreferencesSummaryDto,
+  })
+  async getPreferencesSummary(@Request() req: any): Promise<NotificationPreferencesSummaryDto> {
+    const { tenantId } = req.user;
+    return this.notificationPreferenceService.getPreferencesSummary(tenantId);
   }
 }

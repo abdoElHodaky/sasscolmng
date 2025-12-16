@@ -6,6 +6,8 @@ import { EmailService } from './services/email.service';
 import { SmsService } from './services/sms.service';
 import { PushService } from './services/push.service';
 import { NotificationTemplateService } from './services/notification-template.service';
+import { NotificationHistoryService } from './services/notification-history.service';
+import { NotificationPreferenceService } from './services/notification-preference.service';
 import { WebSocketGateway } from './services/websocket.gateway';
 import { NotificationController } from './controllers/notification.controller';
 import { NotificationProcessor } from './services/notification.processor';
@@ -31,9 +33,19 @@ import { DatabaseModule } from '../database/database.module';
     SmsService,
     PushService,
     NotificationTemplateService,
+    NotificationHistoryService,
+    NotificationPreferenceService,
     WebSocketGateway,
     NotificationProcessor,
   ],
-  exports: [NotificationService, EmailService, SmsService, PushService, NotificationTemplateService],
+  exports: [
+    NotificationService, 
+    EmailService, 
+    SmsService, 
+    PushService, 
+    NotificationTemplateService,
+    NotificationHistoryService,
+    NotificationPreferenceService,
+  ],
 })
 export class NotificationsModule {}
