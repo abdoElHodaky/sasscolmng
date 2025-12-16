@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 // import * as admin from 'firebase-admin'; // TODO: Install firebase-admin package
+// Note: To enable real Firebase integration, run: npm install firebase-admin
+// Then uncomment the import above and the initialization code below
 
 export interface PushNotificationOptions {
   token: string;

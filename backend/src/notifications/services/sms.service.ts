@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 // import { Twilio } from 'twilio'; // TODO: Install twilio package
+// Note: To enable real Twilio integration, run: npm install twilio
+// Then uncomment the import above and the initialization code below
 
 export interface SmsOptions {
   to: string;
