@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sasscolmng-config
+  namespace: sasscolmng
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  REDIS_HOST: "redis-service"
+  REDIS_PORT: "6379"
+  SMTP_HOST: "smtp.gmail.com"
+  SMTP_PORT: "587"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sasscolmng-secrets
+  namespace: sasscolmng
+type: Opaque
+data:
+  # Base64 encoded values - replace with actual values
+  DATABASE_URL: cG9zdGdyZXNxbDovL3VzZXI6cGFzc3dvcmRAcG9zdGdyZXM6NTQzMi9zYXNzY29sbW5n
+  JWT_SECRET: eW91ci1zdXBlci1zZWNyZXQtand0LWtleQ==
+  JWT_REFRESH_SECRET: eW91ci1zdXBlci1zZWNyZXQtcmVmcmVzaC1rZXk=
+  REDIS_PASSWORD: cmVkaXMxMjM=
+  STRIPE_SECRET_KEY: c2tfdGVzdF8xMjM0NTY3ODkw
+  STRIPE_WEBHOOK_SECRET: d2hzZWNfMTIzNDU2Nzg5MA==
+  TWILIO_ACCOUNT_SID: QUMxMjM0NTY3ODkw
+  TWILIO_AUTH_TOKEN: dHdpbGlvX3Rva2VuXzEyMw==
+  TWILIO_PHONE_NUMBER: KzE1NTU1MjM0NTY3
+  SMTP_USER: eW91ci1lbWFpbEBnbWFpbC5jb20=
+  SMTP_PASS: eW91ci1lbWFpbC1wYXNzd29yZA==
