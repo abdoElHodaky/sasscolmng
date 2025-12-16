@@ -160,7 +160,7 @@ backend/
 
 ```env
 # Database
-DATABASE_URL="postgresql://username:password@localhost:5432/sasscolmng_dev"
+DATABASE_URL="postgresql://your_username:your_password@localhost:5432/sasscolmng_dev"
 
 # JWT
 JWT_SECRET="your-super-secret-jwt-key"
