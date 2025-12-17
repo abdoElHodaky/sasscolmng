@@ -44,18 +44,27 @@ export class OrToolsService implements ISolver {
         this.logger.warn(`Hard constraint violations found: ${hardViolations.length}`);
         return {
           success: false,
+          scheduleId: request.scheduleId,
+          sessions: [],
           schedule: [],
           conflicts: hardViolations.map(v => ({
-            id: `conflict-${Date.now()}-${Math.random()}`,
             type: v.constraintType as any,
             severity: v.severity,
             description: v.description,
             affectedSessions: v.affectedEntities,
-            suggestedResolution: v.suggestedResolution,
           })),
+          metrics: {
+            totalSessions: 0,
+            scheduledSessions: 0,
+            unscheduledSessions: 0,
+            conflictCount: hardViolations.length,
+            optimizationScore: 0,
+            executionTime: Date.now() - startTime,
+          },
           optimizationScore: 0,
           solvingTime: Date.now() - startTime,
           message: 'Hard constraint violations prevent schedule generation',
+          warnings: [],
         };
       }
 
@@ -87,11 +96,22 @@ export class OrToolsService implements ISolver {
       this.logger.error(`Schedule optimization failed: ${error.message}`);
       return {
         success: false,
+        scheduleId: request.scheduleId,
+        sessions: [],
         schedule: [],
         conflicts: [],
+        metrics: {
+          totalSessions: 0,
+          scheduledSessions: 0,
+          unscheduledSessions: 0,
+          conflictCount: 0,
+          optimizationScore: 0,
+          executionTime: Date.now() - startTime,
+        },
         optimizationScore: 0,
         solvingTime: Date.now() - startTime,
         message: `Optimization failed: ${error.message}`,
+        warnings: [],
       };
     }
   }
@@ -274,7 +294,7 @@ export class OrToolsService implements ISolver {
     ];
   }
 
-  private async heuristicSolver(request: SchedulingRequest, config: any): Promise<Partial<SchedulingResult>> {
+  private async heuristicSolver(request: SchedulingRequest, config: any): Promise<SchedulingResult> {
     // This is a simplified heuristic solver
     // In production, this would be replaced with actual OR-Tools CP-SAT integration
     
@@ -286,10 +306,22 @@ export class OrToolsService implements ISolver {
     
     return {
       success: true,
+      scheduleId: request.scheduleId,
+      sessions: optimizedSessions,
       schedule: optimizedSessions,
       conflicts: [],
+      metrics: {
+        totalSessions: sessions.length,
+        scheduledSessions: optimizedSessions.length,
+        unscheduledSessions: Math.max(0, sessions.length - optimizedSessions.length),
+        conflictCount: 0,
+        optimizationScore,
+        executionTime: 0, // Will be set by caller
+      },
       optimizationScore,
+      solvingTime: 0, // Will be set by caller
       message: 'Schedule generated using heuristic solver',
+      warnings: [],
     };
   }
 
@@ -439,5 +471,98 @@ export class OrToolsService implements ISolver {
     if (totalTeacherDays === 0) return 100;
     
     return Math.round(((totalTeacherDays - violatingTeacherDays) / totalTeacherDays) * 100);
+  }
+
+  /**
+   * Validates a scheduling request to ensure it meets basic requirements
+   */
+  async validateRequest(request: SchedulingRequest): Promise<boolean> {
+    try {
+      // Check required fields
+      if (!request.scheduleId || !request.schoolId) {
+        this.logger.warn('Missing required fields: scheduleId or schoolId');
+        return false;
+      }
+
+      // Check time horizon
+      if (!request.timeHorizon || !request.timeHorizon.startDate || !request.timeHorizon.endDate) {
+        this.logger.warn('Missing or invalid time horizon');
+        return false;
+      }
+
+      // Validate date range
+      const startDate = new Date(request.timeHorizon.startDate);
+      const endDate = new Date(request.timeHorizon.endDate);
+      if (startDate >= endDate) {
+        this.logger.warn('Invalid date range: start date must be before end date');
+        return false;
+      }
+
+      // Check resources
+      if (!request.resources) {
+        this.logger.warn('Missing resources in request');
+        return false;
+      }
+
+      const { teachers, rooms, subjects, classes } = request.resources;
+      if (!teachers?.length || !rooms?.length || !subjects?.length || !classes?.length) {
+        this.logger.warn('Missing required resources: teachers, rooms, subjects, or classes');
+        return false;
+      }
+
+      // Check constraints and preferences structure
+      if (!request.constraints) {
+        this.logger.warn('Missing constraints in request');
+        return false;
+      }
+
+      if (!request.preferences) {
+        this.logger.warn('Missing preferences in request');
+        return false;
+      }
+
+      this.logger.log('Request validation passed');
+      return true;
+
+    } catch (error) {
+      this.logger.error(`Request validation failed: ${error.message}`);
+      return false;
+    }
+  }
+
+  /**
+   * Returns the capabilities of this solver
+   */
+  getCapabilities(): import('../interfaces/solver.interface').SolverCapabilities {
+    return {
+      supportedConstraints: [
+        'TEACHER_AVAILABILITY',
+        'ROOM_CAPACITY',
+        'TIME_SLOT_CONFLICTS',
+        'SUBJECT_REQUIREMENTS',
+        'CLASS_SCHEDULING',
+        'RESOURCE_CONFLICTS',
+        'WORKLOAD_LIMITS',
+        'CONSECUTIVE_SESSIONS',
+        'BREAK_REQUIREMENTS',
+        'EQUIPMENT_REQUIREMENTS'
+      ],
+      maxResources: {
+        teachers: 1000,
+        rooms: 500,
+        classes: 200,
+        timeSlots: 100
+      },
+      features: [
+        'HARD_CONSTRAINTS',
+        'SOFT_CONSTRAINTS',
+        'OPTIMIZATION_SCORING',
+        'CONFLICT_DETECTION',
+        'HEURISTIC_FALLBACK',
+        'PARALLEL_SOLVING',
+        'INCREMENTAL_UPDATES',
+        'CONSTRAINT_VALIDATION'
+      ]
+    };
   }
 }

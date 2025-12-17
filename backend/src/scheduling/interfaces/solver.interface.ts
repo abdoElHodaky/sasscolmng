@@ -164,6 +164,8 @@ export interface SolverConfiguration {
   maxSolvingTimeSeconds: number;  // Alias for backward compatibility
   optimizationLevel: 'FAST' | 'BALANCED' | 'THOROUGH';
   parallelization: boolean;
+  enableParallelSolving?: boolean; // Alias for parallelization
+  memoryLimitMB?: number;
   parameters: Record<string, any>;
 }
 
