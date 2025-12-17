@@ -114,6 +114,20 @@ enum AcademicPeriodType {
   YEAR
 }
 
+enum WaitingListStatus {
+  PENDING
+  IN_PROGRESS
+  ASSIGNED
+  CANCELLED
+}
+
+enum WaitingListPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
 // Core Models
 model Tenant {
   id          String   @id @default(cuid())
@@ -174,6 +188,11 @@ model User {
   createdTemplates      NotificationTemplate[] @relation("TemplateCreator")
   receivedNotifications Notification[]         @relation("NotificationRecipient")
   notificationPreferences NotificationPreference[]
+  waitingListRequests     WaitingList[]           @relation("WaitingListRequester")
+  waitingListTeaching     WaitingList[]           @relation("WaitingListTeacher")
+  waitingListAssignments  WaitingList[]           @relation("WaitingListAssigner")
+  teacherProfile          TeacherProfile?
+  studentProfile          StudentProfile?
 
   @@index([tenantId])
   @@index([schoolId])
@@ -222,6 +241,7 @@ model School {
 
   // Billing relations
   subscriptions Subscription[]
+  waitingLists  WaitingList[]
 
   @@index([tenantId])
   @@map("schools")
@@ -242,6 +262,7 @@ model Subject {
   teachers        TeacherSubject[]
   classSubjects   ClassSubject[]
   sessions        ScheduleSession[]
+  waitingLists    WaitingList[]
 
   @@index([schoolId])
   @@map("subjects")
@@ -260,9 +281,11 @@ model Class {
   updatedAt         DateTime @updatedAt
 
   // Relations
-  school        School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  school        School           @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   subjects      ClassSubject[]
   sessions      ScheduleSession[]
+  waitingLists  WaitingList[]
+  students      StudentProfile[]
 
   @@index([schoolId])
   @@map("classes")
@@ -282,8 +305,9 @@ model Room {
   updatedAt   DateTime @updatedAt
 
   // Relations
-  school   School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  sessions ScheduleSession[]
+  school       School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  sessions     ScheduleSession[]
+  waitingLists WaitingList[]
 
   @@index([schoolId])
   @@map("rooms")
@@ -297,7 +321,7 @@ model TeacherSubject {
   createdAt DateTime @default(now())
 
   // Relations
-  teacher User    @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
   @@unique([teacherId, subjectId])
@@ -340,8 +364,9 @@ model TimeSlot {
   updatedAt   DateTime     @updatedAt
 
   // Relations
-  school   School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  sessions ScheduleSession[]
+  school       School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  sessions     ScheduleSession[]
+  waitingLists WaitingList[]
 
   @@index([schoolId])
   @@index([dayOfWeek])
@@ -588,6 +613,79 @@ enum UsageMetricType {
   CUSTOM
 }
 
+model WaitingList {
+  id           String              @id @default(cuid())
+  schoolId     String
+  subjectId    String
+  classId      String
+  teacherId    String?
+  roomId       String?
+  timeSlotId   String?
+  priority     WaitingListPriority @default(MEDIUM)
+  status       WaitingListStatus   @default(PENDING)
+  requestedBy  String
+  reason       String
+  notes        String?
+  requestedAt  DateTime            @default(now())
+  assignedAt   DateTime?
+  assignedBy   String?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  // Relations
+  school       School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  subject      Subject             @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  class        Class               @relation(fields: [classId], references: [id], onDelete: Cascade)
+  teacher      User?               @relation("WaitingListTeacher", fields: [teacherId], references: [id], onDelete: SetNull)
+  room         Room?               @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  timeSlot     TimeSlot?           @relation(fields: [timeSlotId], references: [id], onDelete: SetNull)
+  requester    User                @relation("WaitingListRequester", fields: [requestedBy], references: [id], onDelete: Cascade)
+  assigner     User?               @relation("WaitingListAssigner", fields: [assignedBy], references: [id], onDelete: SetNull)
+
+  @@map("waiting_lists")
+}
+
+model TeacherProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  employeeId   String?  @unique
+  department   String?
+  specialization String?
+  qualification String?
+  experience   Int?     // years of experience
+  joiningDate  DateTime?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("teacher_profiles")
+}
+
+model StudentProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  studentId    String?  @unique
+  classId      String?
+  rollNumber   String?
+  admissionDate DateTime?
+  guardianName String?
+  guardianPhone String?
+  guardianEmail String?
+  address      String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  class Class? @relation(fields: [classId], references: [id], onDelete: SetNull)
+
+  @@map("student_profiles")
+}
+
 model BillingPlan {
   id                String          @id @default(cuid())
   name              String
@@ -816,14 +914,21 @@ model Notification {
   recipientEmail    String?
   recipientPhone    String?
   subject           String?
-  content           String
+  message           String               // renamed from content for service compatibility
+  content           String?              // keep for backward compatibility
+  entityId          String?              // ID of related entity (schedule, class, etc.)
+  entityType        String?              // Type of related entity
   scheduledFor      DateTime?            // for scheduled notifications
+  scheduledAt       DateTime?            // alias for scheduledFor for service compatibility
   sentAt            DateTime?
   deliveredAt       DateTime?
   readAt            DateTime?
-  failureReason     String?
-  retryCount        Int                  @default(0)
-  maxRetries        Int                  @default(3)
+  errorMessage      String?              // renamed from failureReason for service compatibility
+  failureReason     String?              // keep for backward compatibility
+  attempts          Int                  @default(0)  // renamed from retryCount for service compatibility
+  retryCount        Int?                 // keep for backward compatibility
+  maxAttempts       Int                  @default(3)  // renamed from maxRetries for service compatibility
+  maxRetries        Int?                 // keep for backward compatibility
   metadata          Json?
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt

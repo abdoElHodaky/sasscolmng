@@ -282,6 +282,39 @@ export class StripeService {
   }
 
   /**
+   * Update a subscription
+   */
+  async updateSubscription(subscriptionId: string, options: { priceId?: string; cancelAtPeriodEnd?: boolean; prorationBehavior?: string }): Promise<StripeSubscription> {
+    if (!this.isEnabled) {
+      throw new Error('Stripe service is not configured');
+    }
+
+    try {
+      // TODO: Implement actual Stripe subscription update
+      // const subscription = await this.stripe.subscriptions.update(subscriptionId, {
+      //   items: options.priceId ? [{ price: options.priceId }] : undefined,
+      //   cancel_at_period_end: options.cancelAtPeriodEnd,
+      //   proration_behavior: options.prorationBehavior,
+      // });
+
+      // Mock response for development
+      return {
+        id: subscriptionId,
+        customerId: 'mock_customer_id',
+        priceId: options.priceId || 'mock_price_id',
+        status: 'active',
+        currentPeriodStart: new Date(),
+        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+        cancelAtPeriodEnd: options.cancelAtPeriodEnd || false,
+        metadata: {},
+      };
+    } catch (error: any) {
+      this.logger.error(`Failed to update subscription: ${error.message}`);
+      throw new Error(`Failed to update subscription: ${error.message}`);
+    }
+  }
+
+  /**
    * Create a payment intent
    */
   async createPaymentIntent(options: CreatePaymentIntentOptions): Promise<StripePaymentIntent> {

@@ -223,10 +223,14 @@ export class SchoolsService {
         classes: {
           include: {
             subjects: {
-              select: {
-                id: true,
-                name: true,
-                code: true,
+              include: {
+                subject: {
+                  select: {
+                    id: true,
+                    name: true,
+                    code: true,
+                  },
+                },
               },
             },
           },

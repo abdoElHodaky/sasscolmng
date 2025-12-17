@@ -44,7 +44,7 @@ export class SchedulingProcessor {
             timeSlotId: session.timeSlotId,
             date: session.date.toISOString(),
             duration: session.duration,
-            type: session.type || 'REGULAR',
+            type: (session.type || 'REGULAR') as 'REGULAR' | 'EXAM' | 'LAB' | 'SPECIAL' | 'MAKEUP',
           });
         }
         
@@ -130,7 +130,7 @@ export class SchedulingProcessor {
       // Update schedule metadata
       await this.scheduleService.update(scheduleId, {
         metadata: {
-          ...schedule.metadata,
+          ...(schedule.metadata && typeof schedule.metadata === 'object' ? schedule.metadata : {}),
           lastOptimizedAt: new Date().toISOString(),
           optimizationImprovement: 'TBD', // Calculate improvement
         },
@@ -206,4 +206,3 @@ interface ScheduleOptimizationJobData {
 interface ConstraintValidationJobData {
   scheduleId: string;
 }
-

@@ -126,6 +126,24 @@ export class UsersService {
     });
   }
 
+  async findByIdWithPassword(id: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      include: {
+        tenant: true,
+        school: true,
+        teacherProfile: true,
+        studentProfile: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.prisma.user.findUnique({
       where: { id },
@@ -259,4 +277,3 @@ export class UsersService {
     };
   }
 }
-

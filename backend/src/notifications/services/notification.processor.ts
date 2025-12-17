@@ -7,7 +7,8 @@ import { SmsService } from './sms.service';
 import { PushService } from './push.service';
 import { WebSocketGateway } from './websocket.gateway';
 import { NotificationJob } from './notification.service';
-import { NotificationType } from '../dto';
+import { NotificationType } from '@prisma/client';
+import { $Enums } from '@prisma/client';
 
 @Processor('notifications')
 export class NotificationProcessor {
@@ -32,7 +33,7 @@ export class NotificationProcessor {
         where: { id: data.id },
         data: {
           attempts: { increment: 1 },
-          status: 'PROCESSING',
+          status: $Enums.NotificationStatus.PENDING,
         },
       });
 

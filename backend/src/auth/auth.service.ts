@@ -13,6 +13,7 @@ import { PrismaService } from '../database/prisma.service';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { UserRole } from '@prisma/client';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 @Injectable()
@@ -26,10 +27,15 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
+  async validateUser(email: string, password: string, tenantId?: string): Promise<any> {
     const user = await this.usersService.findByEmail(email);
     
     if (user && (await bcrypt.compare(password, user.password))) {
+      // Check tenant isolation if tenantId is provided
+      if (tenantId && user.tenantId !== tenantId) {
+        return null;
+      }
+      
       const { password, ...result } = user;
       return result;
     }
@@ -95,6 +101,8 @@ export class AuthService {
     const user = await this.usersService.create({
       ...registerDto,
       password: hashedPassword,
+      role: registerDto.role || UserRole.TEACHER, // Default to TEACHER if not specified
+      tenantId: registerDto.tenantId || 'default-tenant', // Provide default tenant if not specified
     });
 
     this.logger.log(`New user registered: ${user.email}`);
@@ -184,7 +192,7 @@ export class AuthService {
     currentPassword: string,
     newPassword: string,
   ) {
-    const user = await this.usersService.findById(userId);
+    const user = await this.usersService.findByIdWithPassword(userId);
     
     if (!user) {
       throw new UnauthorizedException('User not found');
@@ -253,4 +261,3 @@ export class AuthService {
     };
   }
 }
-

@@ -7,9 +7,9 @@ import { WebSocketGateway } from './websocket.gateway';
 import {
   CreateNotificationDto,
   BulkNotificationDto,
-  NotificationType,
-  NotificationPriority,
+
 } from '../dto';
+import { $Enums, NotificationType } from '@prisma/client';
 
 export interface NotificationJob {
   id: string;
@@ -17,7 +17,7 @@ export interface NotificationJob {
   recipient: string;
   subject: string;
   message: string;
-  priority: NotificationPriority;
+  priority: $Enums.NotificationPriority;
   templateId?: string;
   templateData?: Record<string, any>;
   tenantId?: string;
@@ -46,15 +46,14 @@ export class NotificationService {
       const notification = await this.prisma.notification.create({
         data: {
           type: dto.type,
-          recipient: dto.recipient,
+          recipientId: dto.recipient,
           subject: dto.subject,
           message: dto.message,
-          priority: dto.priority || NotificationPriority.MEDIUM,
+          priority: dto.priority || $Enums.NotificationPriority.NORMAL,
           status: 'PENDING',
           templateId: dto.templateId,
-          templateData: dto.templateData ? JSON.stringify(dto.templateData) : null,
+          metadata: dto.templateData ? dto.templateData : null,
           tenantId: dto.tenantId,
-          userId: dto.userId,
           entityId: dto.entityId,
           entityType: dto.entityType,
           scheduledAt: dto.scheduledAt ? new Date(dto.scheduledAt) : null,
@@ -70,7 +69,7 @@ export class NotificationService {
         recipient: dto.recipient,
         subject: dto.subject,
         message: dto.message,
-        priority: dto.priority || NotificationPriority.MEDIUM,
+        priority: dto.priority || $Enums.NotificationPriority.NORMAL,
         templateId: dto.templateId,
         templateData: dto.templateData,
         tenantId: dto.tenantId,
@@ -88,7 +87,7 @@ export class NotificationService {
 
       await this.notificationQueue.add('send-notification', job, {
         delay: Math.max(0, delay),
-        priority: this.getPriorityValue(dto.priority || NotificationPriority.MEDIUM),
+        priority: this.getPriorityValue(dto.priority || $Enums.NotificationPriority.NORMAL),
         attempts: 3,
         backoff: {
           type: 'exponential',
@@ -311,19 +310,18 @@ export class NotificationService {
     }
   }
 
-  private getPriorityValue(priority: NotificationPriority): number {
+  private getPriorityValue(priority: $Enums.NotificationPriority): number {
     switch (priority) {
-      case NotificationPriority.URGENT:
+      case $Enums.NotificationPriority.URGENT:
         return 1;
-      case NotificationPriority.HIGH:
+      case $Enums.NotificationPriority.HIGH:
         return 2;
-      case NotificationPriority.MEDIUM:
+      case $Enums.NotificationPriority.NORMAL:
         return 3;
-      case NotificationPriority.LOW:
+      case $Enums.NotificationPriority.LOW:
         return 4;
       default:
         return 3;
     }
   }
 }
-

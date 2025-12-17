@@ -12,15 +12,15 @@ export class TimeSlotService {
   async create(createTimeSlotDto: CreateTimeSlotDto) {
     try {
       // Validate that end time is after start time
-      const startTime = this.parseTime(createTimeSlotDto.startTime);
-      const endTime = this.parseTime(createTimeSlotDto.endTime);
+      const startTime: Date = this.parseTime(createTimeSlotDto.startTime);
+      const endTime: Date = this.parseTime(createTimeSlotDto.endTime);
       
       if (endTime <= startTime) {
         throw new BadRequestException('End time must be after start time');
       }
 
       // Calculate duration if not provided or validate if provided
-      const calculatedDuration = (endTime - startTime) / (1000 * 60); // minutes
+      const calculatedDuration = (endTime.getTime() - startTime.getTime()) / (1000 * 60); // minutes
       if (Math.abs(calculatedDuration - createTimeSlotDto.duration) > 1) {
         throw new BadRequestException('Duration does not match start and end times');
       }
@@ -153,8 +153,8 @@ export class TimeSlotService {
     try {
       // Validate times if both are provided
       if (updateTimeSlotDto.startTime && updateTimeSlotDto.endTime) {
-        const startTime = this.parseTime(updateTimeSlotDto.startTime);
-        const endTime = this.parseTime(updateTimeSlotDto.endTime);
+        const startTime: Date = this.parseTime(updateTimeSlotDto.startTime);
+        const endTime: Date = this.parseTime(updateTimeSlotDto.endTime);
         
         if (endTime <= startTime) {
           throw new BadRequestException('End time must be after start time');
@@ -162,7 +162,7 @@ export class TimeSlotService {
 
         // Calculate duration if not provided
         if (!updateTimeSlotDto.duration) {
-          updateTimeSlotDto.duration = (endTime - startTime) / (1000 * 60);
+          updateTimeSlotDto.duration = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
         }
       }
 
@@ -312,4 +312,3 @@ export class TimeSlotService {
     }
   }
 }
-

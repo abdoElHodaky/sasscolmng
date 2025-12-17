@@ -44,7 +44,7 @@ export class EmailService {
     };
 
     if (smtpConfig.host && smtpConfig.auth.user) {
-      this.transporter = nodemailer.createTransporter(smtpConfig);
+      this.transporter = nodemailer.createTransport(smtpConfig);
       this.logger.log('SMTP email service initialized');
     }
   }
@@ -205,4 +205,3 @@ export class EmailService {
     }
   }
 }
-

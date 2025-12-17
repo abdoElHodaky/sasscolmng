@@ -99,8 +99,9 @@ export class AuthController {
     schema: {
       type: 'object',
       properties: {
-        refreshToken: { type: 'string', required: false },
+        refreshToken: { type: 'string' },
       },
+      required: [],
     },
     required: false,
   })

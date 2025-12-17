@@ -74,7 +74,7 @@ export class SubscriptionService {
     // Calculate trial period if applicable
     let trialStart: Date | null = null;
     let trialEnd: Date | null = null;
-    let status = SubscriptionStatus.ACTIVE;
+    let status: SubscriptionStatus = SubscriptionStatus.ACTIVE;
 
     if (startTrial && plan.trialDays && plan.trialDays > 0) {
       trialStart = subscriptionStart;
@@ -87,7 +87,7 @@ export class SubscriptionService {
     let stripeSubscriptionId: string | undefined;
     let stripeCustomerIdToUse = stripeCustomerId;
 
-    if (this.stripeService.isEnabled()) {
+    if (this.stripeService.getServiceStatus().enabled) {
       try {
         // Create or get Stripe customer
         if (!stripeCustomerIdToUse) {
@@ -176,10 +176,10 @@ export class SubscriptionService {
 
       // Calculate proration
       proration = await this.calculateProration(subscription, newPlan);
-      updateData.planId = updateSubscriptionDto.planId;
+      updateData.plan = { connect: { id: updateSubscriptionDto.planId } };
 
       // Update Stripe subscription if applicable
-      if (subscription.stripeSubscriptionId && this.stripeService.isEnabled()) {
+      if (subscription.stripeSubscriptionId && this.stripeService.getServiceStatus().enabled) {
         try {
           await this.stripeService.updateSubscription(subscription.stripeSubscriptionId, {
             priceId: newPlan.stripePriceId!,
@@ -207,7 +207,7 @@ export class SubscriptionService {
     if (updateSubscriptionDto.cancelAtPeriodEnd !== undefined) {
       updateData.cancelAtPeriodEnd = updateSubscriptionDto.cancelAtPeriodEnd;
 
-      if (subscription.stripeSubscriptionId && this.stripeService.isEnabled()) {
+      if (subscription.stripeSubscriptionId && this.stripeService.getServiceStatus().enabled) {
         try {
           await this.stripeService.updateSubscription(subscription.stripeSubscriptionId, {
             cancelAtPeriodEnd: updateSubscriptionDto.cancelAtPeriodEnd,
@@ -286,7 +286,7 @@ export class SubscriptionService {
     }
 
     // Cancel Stripe subscription if applicable
-    if (subscription.stripeSubscriptionId && this.stripeService.isEnabled()) {
+    if (subscription.stripeSubscriptionId && this.stripeService.getServiceStatus().enabled) {
       try {
         if (immediately) {
           await this.stripeService.cancelSubscription(subscription.stripeSubscriptionId);
@@ -363,7 +363,7 @@ export class SubscriptionService {
     });
 
     // Update Stripe subscription if applicable
-    if (subscription.stripeSubscriptionId && this.stripeService.isEnabled()) {
+    if (subscription.stripeSubscriptionId && this.stripeService.getServiceStatus().enabled) {
       try {
         await this.stripeService.updateSubscription(subscription.stripeSubscriptionId, {
           priceId: newPlan.stripePriceId!,
@@ -562,11 +562,11 @@ export class SubscriptionService {
     );
 
     const currentPlanPrice = subscription.billingCycle === BillingCycle.YEARLY 
-      ? Number(currentPlan.yearlyPrice || currentPlan.monthlyPrice * 12)
+      ? Number(currentPlan.yearlyPrice || Number(currentPlan.monthlyPrice) * 12)
       : Number(currentPlan.monthlyPrice);
 
     const newPlanPrice = subscription.billingCycle === BillingCycle.YEARLY
-      ? Number(newPlan.yearlyPrice || newPlan.monthlyPrice * 12)
+      ? Number(newPlan.yearlyPrice || Number(newPlan.monthlyPrice) * 12)
       : Number(newPlan.monthlyPrice);
 
     const unusedAmount = (currentPlanPrice * remainingDays) / totalDays;

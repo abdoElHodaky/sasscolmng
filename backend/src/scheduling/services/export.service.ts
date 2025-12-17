@@ -85,7 +85,7 @@ export class ExportService {
       const buffer = await workbook.xlsx.writeBuffer();
       
       this.logger.log(`Excel export completed for schedule ${scheduleId}`);
-      return buffer as Buffer;
+      return buffer as any;
     } catch (error) {
       this.logger.error(`Failed to export schedule ${scheduleId} to Excel: ${error.message}`);
       throw error;
@@ -323,7 +323,7 @@ export class ExportService {
     const worksheet = workbook.addWorksheet('Timetable');
     
     // Get unique time slots and days
-    const timeSlots = [...new Set(schedule.sessions.map((s: any) => s.timeSlot))];
+    const timeSlots: any[] = [...new Set(schedule.sessions.map((s: any) => s.timeSlot))];
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     
     // Create header row
@@ -610,4 +610,3 @@ interface ICalExportOptions {
   calendarUrl?: string;
   organizerEmail?: string;
 }
-
