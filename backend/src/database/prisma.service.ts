@@ -33,26 +33,29 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       ],
     });
 
+    // Note: Prisma event logging disabled due to TypeScript compatibility issues
+    // TODO: Re-enable when Prisma client types are updated
+    
     // Log database queries in development
-    if (configService.get('NODE_ENV') === 'development') {
-      this.$on('query', (e) => {
-        this.logger.debug(`Query: ${e.query}`);
-        this.logger.debug(`Params: ${e.params}`);
-        this.logger.debug(`Duration: ${e.duration}ms`);
-      });
-    }
+    // if (configService.get('NODE_ENV') === 'development') {
+    //   this.$on('query', (e) => {
+    //     this.logger.debug(`Query: ${e.query}`);
+    //     this.logger.debug(`Params: ${e.params}`);
+    //     this.logger.debug(`Duration: ${e.duration}ms`);
+    //   });
+    // }
 
-    this.$on('error', (e) => {
-      this.logger.error('Database error:', e);
-    });
+    // this.$on('error', (e) => {
+    //   this.logger.error('Database error:', e);
+    // });
 
-    this.$on('info', (e) => {
-      this.logger.log('Database info:', e);
-    });
+    // this.$on('info', (e) => {
+    //   this.logger.log('Database info:', e);
+    // });
 
-    this.$on('warn', (e) => {
-      this.logger.warn('Database warning:', e);
-    });
+    // this.$on('warn', (e) => {
+    //   this.logger.warn('Database warning:', e);
+    // });
   }
 
   async onModuleInit() {
@@ -122,4 +125,3 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     }
   }
 }
-

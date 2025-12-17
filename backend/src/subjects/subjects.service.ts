@@ -65,13 +65,17 @@ export class SubjectsService {
             },
           },
         },
-        classes: {
-          select: {
-            id: true,
-            name: true,
-            grade: true,
-            capacity: true,
-            isActive: true,
+        classSubjects: {
+          include: {
+            class: {
+              select: {
+                id: true,
+                name: true,
+                grade: true,
+                capacity: true,
+                isActive: true,
+              },
+            },
           },
         },
       },
@@ -139,11 +143,15 @@ export class SubjectsService {
               },
             },
           },
-          classes: {
-            select: {
-              id: true,
-              name: true,
-              isActive: true,
+          classSubjects: {
+            include: {
+              class: {
+                select: {
+                  id: true,
+                  name: true,
+                  isActive: true,
+                },
+              },
             },
           },
         },
@@ -155,8 +163,8 @@ export class SubjectsService {
     const enrichedSubjects = subjects.map((subject) => ({
       ...subject,
       teacherCount: subject.teachers.length,
-      classCount: subject.classes.length,
-      activeClassCount: subject.classes.filter((c) => c.isActive).length,
+      classCount: subject.classSubjects.length,
+      activeClassCount: subject.classSubjects.filter((cs) => cs.class.isActive).length,
     }));
 
     return new PaginatedResponseDto(enrichedSubjects, total, page, limit);
@@ -198,16 +206,20 @@ export class SubjectsService {
             },
           },
         },
-        classes: {
+        classSubjects: {
           include: {
-            students: {
-              select: {
-                id: true,
-                user: {
+            class: {
+              include: {
+                students: {
                   select: {
-                    firstName: true,
-                    lastName: true,
-                    email: true,
+                    id: true,
+                    user: {
+                      select: {
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                      },
+                    },
                   },
                 },
               },
@@ -305,7 +317,7 @@ export class SubjectsService {
       where,
       include: {
         teachers: true,
-        classes: true,
+        classSubjects: true,
       },
     });
 
@@ -314,7 +326,7 @@ export class SubjectsService {
     }
 
     // Check if subject has associated data
-    if (subject.teachers.length > 0 || subject.classes.length > 0) {
+    if (subject.teachers.length > 0 || subject.classSubjects.length > 0) {
       throw new BadRequestException(
         'Cannot delete subject with existing teacher assignments or classes. Please remove all associations first.',
       );
@@ -394,7 +406,7 @@ export class SubjectsService {
     }
 
     // Check if assignment already exists
-    const existingAssignment = await this.prisma.subjectTeacher.findFirst({
+    const existingAssignment = await this.prisma.teacherSubject.findFirst({
       where: {
         subjectId,
         teacherId,
@@ -405,7 +417,7 @@ export class SubjectsService {
       throw new BadRequestException('Teacher is already assigned to this subject');
     }
 
-    return this.prisma.subjectTeacher.create({
+    return this.prisma.teacherSubject.create({
       data: {
         subjectId,
         teacherId,
@@ -418,15 +430,11 @@ export class SubjectsService {
             code: true,
           },
         },
-        teacher: {
-          include: {
-            user: {
-              select: {
-                firstName: true,
-                lastName: true,
-                email: true,
-              },
-            },
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
           },
         },
       },
@@ -447,7 +455,7 @@ export class SubjectsService {
       throw new NotFoundException('Subject not found');
     }
 
-    const assignment = await this.prisma.subjectTeacher.findFirst({
+    const assignment = await this.prisma.teacherSubject.findFirst({
       where: {
         subjectId,
         teacherId,
@@ -458,11 +466,10 @@ export class SubjectsService {
       throw new NotFoundException('Teacher assignment not found');
     }
 
-    await this.prisma.subjectTeacher.delete({
+    await this.prisma.teacherSubject.delete({
       where: { id: assignment.id },
     });
 
     return { message: 'Teacher removed from subject successfully' };
   }
 }
-

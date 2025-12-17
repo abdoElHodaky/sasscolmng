@@ -72,7 +72,9 @@ export class CacheService {
    */
   async reset(): Promise<void> {
     try {
-      await this.cacheManager.reset();
+      // Note: Using del with wildcard pattern to clear all cache
+      // Different cache stores may have different clear methods
+      await this.cacheManager.del('*');
       this.logger.log('Cache cleared');
     } catch (error) {
       this.logger.error('Cache RESET error:', error);

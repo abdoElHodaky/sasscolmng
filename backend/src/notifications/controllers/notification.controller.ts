@@ -16,8 +16,16 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
-import { CurrentUser } from '../../auth/decorators/current-user.decorator';
-import { RateLimit } from '../../common/guards/rate-limit.guard';
+import { CurrentUser } from '../../auth/decorators/roles.decorator';
+import { RateLimit, RateLimitOptions } from '../../common/guards/rate-limit.guard';
+
+// Rate limit configurations
+const RATE_LIMITS = {
+  STANDARD: { windowMs: 60000, max: 10 }, // 10 requests per minute
+  GENEROUS: { windowMs: 60000, max: 30 }, // 30 requests per minute
+  STRICT: { windowMs: 60000, max: 5 }, // 5 requests per minute
+  BULK: { windowMs: 300000, max: 5 }, // 5 requests per 5 minutes
+} as const;
 import { NotificationService } from '../services/notification.service';
 import { EmailService } from '../services/email.service';
 import { SmsService } from '../services/sms.service';
@@ -60,7 +68,7 @@ export class NotificationController {
   ) {}
 
   @Post('send')
-  @RateLimit('STANDARD')
+  @RateLimit(RATE_LIMITS.STANDARD)
   @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN, UserRole.TEACHER)
   @ApiOperation({ summary: 'Send a notification' })
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Notification queued successfully' })
@@ -77,7 +85,7 @@ export class NotificationController {
   }
 
   @Post('bulk')
-  @RateLimit('BULK')
+  @RateLimit(RATE_LIMITS.BULK)
   @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
   @ApiOperation({ summary: 'Send bulk notifications' })
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Bulk notifications queued successfully' })
@@ -94,14 +102,14 @@ export class NotificationController {
   }
 
   @Get()
-  @RateLimit('GENEROUS')
+  @RateLimit(RATE_LIMITS.GENEROUS)
   @ApiOperation({ summary: 'Get notifications' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Notifications retrieved successfully' })
   async getNotifications(
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '20',
-    @Query('userId') userId?: string,
     @CurrentUser() user: any,
+    @Query('userId') userId?: string,
   ) {
     const pageNum = parseInt(page, 10);
     const limitNum = parseInt(limit, 10);
@@ -118,7 +126,7 @@ export class NotificationController {
   }
 
   @Put(':id/read')
-  @RateLimit('GENEROUS')
+  @RateLimit(RATE_LIMITS.GENEROUS)
   @ApiOperation({ summary: 'Mark notification as read' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Notification marked as read' })
   async markAsRead(
@@ -130,7 +138,7 @@ export class NotificationController {
   }
 
   @Get('delivery-status/:id')
-  @RateLimit('GENEROUS')
+  @RateLimit(RATE_LIMITS.GENEROUS)
   @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
   @ApiOperation({ summary: 'Get notification delivery status' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Delivery status retrieved successfully' })
@@ -139,7 +147,7 @@ export class NotificationController {
   }
 
   @Get('stats')
-  @RateLimit('STANDARD')
+  @RateLimit(RATE_LIMITS.STANDARD)
   @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
   @ApiOperation({ summary: 'Get notification statistics' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Statistics retrieved successfully' })
@@ -149,7 +157,7 @@ export class NotificationController {
   }
 
   @Get('websocket/stats')
-  @RateLimit('STANDARD')
+  @RateLimit(RATE_LIMITS.STANDARD)
   @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
   @ApiOperation({ summary: 'Get WebSocket connection statistics' })
   @ApiResponse({ status: HttpStatus.OK, description: 'WebSocket stats retrieved successfully' })
@@ -167,7 +175,7 @@ export class NotificationController {
   }
 
   @Post('test-email')
-  @RateLimit('STRICT')
+  @RateLimit(RATE_LIMITS.STRICT)
   @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
   @ApiOperation({ summary: 'Test email service connection' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Email test completed' })
@@ -200,7 +208,7 @@ export class NotificationController {
   }
 
   @Post('send-schedule-update')
-  @RateLimit('STANDARD')
+  @RateLimit(RATE_LIMITS.STANDARD)
   @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN, UserRole.TEACHER)
   @ApiOperation({ summary: 'Send schedule update notification' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Schedule update notification sent' })
@@ -229,7 +237,7 @@ export class NotificationController {
   }
 
   @Post('send-realtime')
-  @RateLimit('GENEROUS')
+  @RateLimit(RATE_LIMITS.GENEROUS)
   @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN, UserRole.TEACHER)
   @ApiOperation({ summary: 'Send real-time notification' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Real-time notification sent' })
@@ -255,7 +263,7 @@ export class NotificationController {
   }
 
   @Post('test-sms')
-  @RateLimit('STRICT')
+  @RateLimit(RATE_LIMITS.STRICT)
   @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
   @ApiOperation({ summary: 'Test SMS service' })
   @ApiResponse({ status: HttpStatus.OK, description: 'SMS service test completed' })
@@ -294,7 +302,7 @@ export class NotificationController {
   }
 
   @Post('test-push')
-  @RateLimit('STRICT')
+  @RateLimit(RATE_LIMITS.STRICT)
   @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
   @ApiOperation({ summary: 'Test push notification service' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Push notification service test completed' })
@@ -340,7 +348,7 @@ export class NotificationController {
   }
 
   @Get('service-status')
-  @RateLimit('GENEROUS')
+  @RateLimit(RATE_LIMITS.GENEROUS)
   @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
   @ApiOperation({ summary: 'Get all notification services status' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Services status retrieved' })
@@ -376,7 +384,7 @@ export class NotificationController {
   // ============================================================================
 
   @Get('history')
-  @RateLimit('GENEROUS')
+  @RateLimit(RATE_LIMITS.GENEROUS)
   @ApiOperation({ summary: 'Get notification history' })
   @ApiResponse({
     status: 200,
@@ -392,7 +400,7 @@ export class NotificationController {
   }
 
   @Get('history/:id')
-  @RateLimit('GENEROUS')
+  @RateLimit(RATE_LIMITS.GENEROUS)
   @ApiOperation({ summary: 'Get notification by ID' })
   @ApiResponse({
     status: 200,
@@ -408,7 +416,7 @@ export class NotificationController {
   }
 
   @Put('history/:id/read')
-  @RateLimit('GENEROUS')
+  @RateLimit(RATE_LIMITS.GENEROUS)
   @ApiOperation({ summary: 'Mark notification as read' })
   @ApiResponse({
     status: 200,
@@ -424,7 +432,7 @@ export class NotificationController {
   }
 
   @Put('history/read')
-  @RateLimit('GENEROUS')
+  @RateLimit(RATE_LIMITS.GENEROUS)
   @ApiOperation({ summary: 'Mark multiple notifications as read' })
   @ApiResponse({
     status: 200,
@@ -445,7 +453,7 @@ export class NotificationController {
 
   @Delete('history/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @RateLimit('STANDARD')
+  @RateLimit(RATE_LIMITS.STANDARD)
   @ApiOperation({ summary: 'Delete notification from history' })
   @ApiResponse({
     status: 204,
@@ -460,7 +468,7 @@ export class NotificationController {
   }
 
   @Get('history-stats')
-  @RateLimit('STANDARD')
+  @RateLimit(RATE_LIMITS.STANDARD)
   @ApiOperation({ summary: 'Get notification statistics' })
   @ApiResponse({
     status: 200,
@@ -482,7 +490,7 @@ export class NotificationController {
   }
 
   @Get('unread-count')
-  @RateLimit('GENEROUS')
+  @RateLimit(RATE_LIMITS.GENEROUS)
   @ApiOperation({ summary: 'Get unread notification count' })
   @ApiResponse({
     status: 200,
@@ -505,7 +513,7 @@ export class NotificationController {
   // ============================================================================
 
   @Get('preferences')
-  @RateLimit('GENEROUS')
+  @RateLimit(RATE_LIMITS.GENEROUS)
   @ApiOperation({ summary: 'Get user notification preferences' })
   @ApiResponse({
     status: 200,
@@ -525,7 +533,7 @@ export class NotificationController {
   }
 
   @Post('preferences')
-  @RateLimit('STANDARD')
+  @RateLimit(RATE_LIMITS.STANDARD)
   @ApiOperation({ summary: 'Create or update notification preference' })
   @ApiResponse({
     status: 201,
@@ -541,7 +549,7 @@ export class NotificationController {
   }
 
   @Put('preferences/:id')
-  @RateLimit('STANDARD')
+  @RateLimit(RATE_LIMITS.STANDARD)
   @ApiOperation({ summary: 'Update notification preference' })
   @ApiResponse({
     status: 200,
@@ -563,7 +571,7 @@ export class NotificationController {
   }
 
   @Put('preferences/bulk')
-  @RateLimit('STANDARD')
+  @RateLimit(RATE_LIMITS.STANDARD)
   @ApiOperation({ summary: 'Bulk update notification preferences' })
   @ApiResponse({
     status: 200,
@@ -580,7 +588,7 @@ export class NotificationController {
 
   @Delete('preferences/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @RateLimit('STANDARD')
+  @RateLimit(RATE_LIMITS.STANDARD)
   @ApiOperation({ summary: 'Delete notification preference' })
   @ApiResponse({
     status: 204,
@@ -595,7 +603,7 @@ export class NotificationController {
   }
 
   @Post('preferences/reset')
-  @RateLimit('STANDARD')
+  @RateLimit(RATE_LIMITS.STANDARD)
   @ApiOperation({ summary: 'Reset preferences to defaults' })
   @ApiResponse({
     status: 200,
@@ -608,7 +616,7 @@ export class NotificationController {
   }
 
   @Get('preferences/check-eligibility')
-  @RateLimit('GENEROUS')
+  @RateLimit(RATE_LIMITS.GENEROUS)
   @ApiOperation({ summary: 'Check if user should receive notification' })
   @ApiResponse({
     status: 200,
@@ -636,7 +644,7 @@ export class NotificationController {
   // ============================================================================
 
   @Get('admin/stats')
-  @RateLimit('STANDARD')
+  @RateLimit(RATE_LIMITS.STANDARD)
   @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
   @ApiOperation({ summary: 'Get tenant-wide notification statistics (Admin only)' })
   @ApiResponse({
@@ -658,7 +666,7 @@ export class NotificationController {
   }
 
   @Get('admin/preferences-summary')
-  @RateLimit('STANDARD')
+  @RateLimit(RATE_LIMITS.STANDARD)
   @Roles(UserRole.SUPER_ADMIN, UserRole.SCHOOL_ADMIN)
   @ApiOperation({ summary: 'Get tenant preferences summary (Admin only)' })
   @ApiResponse({

@@ -1,19 +1,6 @@
 import { IsString, IsEmail, IsOptional, IsEnum, IsArray, IsObject } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-
-export enum NotificationType {
-  EMAIL = 'EMAIL',
-  SMS = 'SMS',
-  PUSH = 'PUSH',
-  WEBSOCKET = 'WEBSOCKET',
-}
-
-export enum NotificationPriority {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  URGENT = 'URGENT',
-}
+import { NotificationType, NotificationPriority } from '@prisma/client';
 
 export class CreateNotificationDto {
   @ApiProperty({ description: 'Notification type' })
@@ -35,7 +22,7 @@ export class CreateNotificationDto {
   @ApiPropertyOptional({ description: 'Notification priority', enum: NotificationPriority })
   @IsOptional()
   @IsEnum(NotificationPriority)
-  priority?: NotificationPriority = NotificationPriority.MEDIUM;
+  priority?: NotificationPriority = NotificationPriority.NORMAL;
 
   @ApiPropertyOptional({ description: 'Template ID to use' })
   @IsOptional()
@@ -106,4 +93,3 @@ export class BulkNotificationDto {
   @IsString()
   tenantId?: string;
 }
-

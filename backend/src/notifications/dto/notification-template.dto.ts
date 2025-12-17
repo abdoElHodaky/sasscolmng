@@ -1,6 +1,6 @@
 import { IsString, IsOptional, IsObject, IsEnum } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { NotificationType } from './create-notification.dto';
+import { NotificationType } from '@prisma/client';
 
 export class CreateNotificationTemplateDto {
   @ApiProperty({ description: 'Template name' })
@@ -60,4 +60,3 @@ export class UpdateNotificationTemplateDto {
   @IsObject()
   variables?: Record<string, any>;
 }
-
