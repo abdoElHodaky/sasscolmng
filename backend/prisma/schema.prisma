@@ -183,6 +183,10 @@ model User {
   teacherAvailability TeacherAvailability[]
   createdPreferences SchedulingPreference[] @relation("PreferenceCreator")
   createdRules       SchedulingRule[]       @relation("RuleCreator")
+  
+  // Schedule versioning relations
+  createdVersions    ScheduleVersion[]       @relation("ScheduleVersionCreator")
+  versionTeachingSessions ScheduleVersionSession[] @relation("VersionTeacherSessions")
 
   // Notification relations
   createdTemplates      NotificationTemplate[] @relation("TemplateCreator")
@@ -262,6 +266,7 @@ model Subject {
   teachers        TeacherSubject[]
   classSubjects   ClassSubject[]
   sessions        ScheduleSession[]
+  versionSessions ScheduleVersionSession[]
   waitingLists    WaitingList[]
 
   @@index([schoolId])
@@ -284,6 +289,7 @@ model Class {
   school        School           @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   subjects      ClassSubject[]
   sessions      ScheduleSession[]
+  versionSessions ScheduleVersionSession[]
   waitingLists  WaitingList[]
   students      StudentProfile[]
 
@@ -307,6 +313,7 @@ model Room {
   // Relations
   school       School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   sessions     ScheduleSession[]
+  versionSessions ScheduleVersionSession[]
   waitingLists WaitingList[]
 
   @@index([schoolId])
@@ -366,6 +373,7 @@ model TimeSlot {
   // Relations
   school       School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   sessions     ScheduleSession[]
+  versionSessions ScheduleVersionSession[]
   waitingLists WaitingList[]
 
   @@index([schoolId])
@@ -419,6 +427,7 @@ model Schedule {
   approver       User?             @relation("ScheduleApprover", fields: [approvedBy], references: [id])
   sessions       ScheduleSession[]
   conflicts      ScheduleConflict[]
+  versions       ScheduleVersion[]
 
   @@index([schoolId])
   @@index([academicPeriodId])
@@ -970,4 +979,93 @@ model NotificationPreference {
   @@index([userId])
   @@index([tenantId])
   @@map("notification_preferences")
+}
+
+// Schedule Versioning Models
+model ScheduleVersion {
+  id                String        @id @default(cuid())
+  scheduleId        String
+  version           Int
+  name              String
+  description       String?
+  status            ScheduleStatus
+  optimizationScore Float?
+  conflictCount     Int           @default(0)
+  sessionCount      Int           @default(0)
+  createdBy         String
+  isActive          Boolean       @default(false)
+  metadata          Json?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  // Relations
+  schedule  Schedule                   @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  creator   User                       @relation("ScheduleVersionCreator", fields: [createdBy], references: [id])
+  sessions  ScheduleVersionSession[]
+  conflicts ScheduleVersionConflict[]
+
+  @@unique([scheduleId, version])
+  @@index([scheduleId])
+  @@index([version])
+  @@index([isActive])
+  @@map("schedule_versions")
+}
+
+model ScheduleVersionSession {
+  id                String        @id @default(cuid())
+  scheduleVersionId String
+  subjectId         String
+  classId           String
+  teacherId         String
+  roomId            String
+  timeSlotId        String
+  date              DateTime
+  duration          Int           // minutes
+  type              SessionType   @default(REGULAR)
+  status            SessionStatus @default(SCHEDULED)
+  isRecurring       Boolean       @default(false)
+  recurrencePattern String?
+  notes             String?
+  metadata          Json?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  // Relations
+  scheduleVersion ScheduleVersion @relation(fields: [scheduleVersionId], references: [id], onDelete: Cascade)
+  subject         Subject         @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  class           Class           @relation(fields: [classId], references: [id], onDelete: Cascade)
+  teacher         User            @relation("VersionTeacherSessions", fields: [teacherId], references: [id], onDelete: Cascade)
+  room            Room            @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  timeSlot        TimeSlot        @relation(fields: [timeSlotId], references: [id], onDelete: Cascade)
+
+  @@index([scheduleVersionId])
+  @@index([teacherId])
+  @@index([roomId])
+  @@index([timeSlotId])
+  @@index([date])
+  @@map("schedule_version_sessions")
+}
+
+model ScheduleVersionConflict {
+  id                  String           @id @default(cuid())
+  scheduleVersionId   String
+  type                ConflictType
+  severity            ConflictSeverity
+  description         String
+  affectedSessionIds  String[]         // array of session IDs
+  suggestedResolution String?
+  isResolved          Boolean          @default(false)
+  resolutionNotes     String?
+  resolvedBy          String?
+  resolvedAt          DateTime?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  // Relations
+  scheduleVersion ScheduleVersion @relation(fields: [scheduleVersionId], references: [id], onDelete: Cascade)
+
+  @@index([scheduleVersionId])
+  @@index([type])
+  @@index([severity])
+  @@map("schedule_version_conflicts")
 }
