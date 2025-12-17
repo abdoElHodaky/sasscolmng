@@ -224,7 +224,7 @@ export class SchedulingEngineService {
     const [subjects, classes, rooms, teachers, timeSlots] = await Promise.all([
       this.prisma.subject.findMany({
         where: { schoolId: request.schoolId, isActive: true },
-        include: { teachers: { include: { teacher: true } } },
+        include: { teachers: { include: { user: true } } },
       }),
       this.prisma.class.findMany({
         where: { schoolId: request.schoolId, isActive: true },
@@ -258,23 +258,79 @@ export class SchedulingEngineService {
 
     // Convert to scheduling request format
     const schedulingRequest: SchedulingRequest = {
+      scheduleId: `schedule-${Date.now()}`,
       schoolId: request.schoolId,
-      startDate: new Date(request.startDate),
-      endDate: new Date(request.endDate),
-      constraints: rules.map(rule => ({
-        id: rule.id,
-        type: rule.isMandatory ? 'HARD' : 'SOFT',
-        priority: rule.priority,
-        description: rule.description,
-        validate: () => true, // This would be implemented based on rule type
-      })),
-      preferences: preferences.map(pref => ({
-        id: pref.id,
-        type: pref.type as any,
-        entityId: pref.entityId,
-        weight: pref.weight,
-        parameters: pref.parameters as Record<string, any>,
-      })),
+      timeHorizon: {
+        startDate: new Date(request.startDate),
+        endDate: new Date(request.endDate),
+        workingDays: [1, 2, 3, 4, 5], // Monday to Friday
+        timeSlots: timeSlots.map(ts => ({
+          id: ts.id,
+          startTime: ts.startTime,
+          endTime: ts.endTime,
+          dayOfWeek: ts.dayOfWeek,
+          duration: ts.duration,
+        })),
+      },
+      resources: {
+        teachers: teachers.map(teacher => ({
+          id: teacher.id,
+          name: `${teacher.firstName} ${teacher.lastName}`,
+          subjects: [], // Would be populated from teacher subjects
+          maxHoursPerWeek: 40, // Default value
+          availability: [], // Would be populated from teacher availability
+        })),
+        rooms: rooms.map(room => ({
+          id: room.id,
+          name: room.name,
+          capacity: room.capacity,
+          equipment: room.features || [],
+          availability: [], // Would be populated from room availability
+        })),
+        subjects: subjects.map(subject => ({
+          id: subject.id,
+          name: subject.name,
+          hoursPerWeek: 4, // Default hours per week
+          requiresSpecialEquipment: [], // Would be populated from subject requirements
+        })),
+        classes: classes.map(cls => ({
+          id: cls.id,
+          name: cls.name,
+          studentCount: 30, // Default student count
+          subjects: cls.subjects?.map(s => s.subjectId) || [],
+        })),
+      },
+      constraints: {
+        hard: rules.filter(rule => rule.isMandatory).map(rule => ({
+          type: rule.type,
+          parameters: (rule.conditions as Record<string, any>) || {},
+        })),
+        soft: rules.filter(rule => !rule.isMandatory).map(rule => ({
+          type: rule.type,
+          weight: rule.priority,
+          parameters: (rule.conditions as Record<string, any>) || {},
+        })),
+      },
+      preferences: {
+        teacherPreferences: preferences.filter(pref => pref.type === 'TEACHER_PREFERENCE').map(pref => ({
+          teacherId: pref.entityId,
+          preferredTimeSlots: (pref.parameters as any)?.preferredTimeSlots || [],
+          unavailableTimeSlots: (pref.parameters as any)?.unavailableTimeSlots || [],
+          maxConsecutiveHours: (pref.parameters as any)?.maxConsecutiveHours || 8,
+          preferredRooms: (pref.parameters as any)?.preferredRooms || [],
+        })),
+        roomPreferences: preferences.filter(pref => pref.type === 'ROOM_PREFERENCE').map(pref => ({
+          roomId: pref.entityId,
+          preferredSubjects: (pref.parameters as any)?.preferredSubjects || [],
+          capacity: (pref.parameters as any)?.capacity || 30,
+          equipment: (pref.parameters as any)?.equipment || [],
+        })),
+        timePreferences: preferences.filter(pref => pref.type === 'TIME_PREFERENCE').map(pref => ({
+          timeSlotId: pref.entityId,
+          weight: pref.weight,
+          description: pref.description || '',
+        })),
+      },
       existingSessions: request.includeExistingSessions ? [] : undefined, // Would fetch existing sessions
     };
 
@@ -351,4 +407,3 @@ export class SchedulingEngineService {
     }
   }
 }
-

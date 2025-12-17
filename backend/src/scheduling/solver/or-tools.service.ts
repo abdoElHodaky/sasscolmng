@@ -27,9 +27,13 @@ export class OrToolsService implements ISolver {
       this.logger.log(`Starting schedule optimization for school ${request.schoolId}`);
 
       // Set default configuration
-      const solverConfig = {
+      const solverConfig: SolverConfiguration = {
+        algorithm: config?.algorithm || 'OR_TOOLS',
+        maxExecutionTime: config?.maxExecutionTime || 300000, // 5 minutes in ms
+        parallelization: config?.parallelization || config?.enableParallelSolving || false,
+        parameters: config?.parameters || {},
         maxSolvingTimeSeconds: config?.maxSolvingTimeSeconds || 300,
-        optimizationLevel: config?.optimizationLevel || 'STANDARD',
+        optimizationLevel: config?.optimizationLevel || 'BALANCED',
         enableParallelSolving: config?.enableParallelSolving || false,
         memoryLimitMB: config?.memoryLimitMB || 1024,
       };
@@ -179,8 +183,15 @@ export class OrToolsService implements ISolver {
       rooms: [],
       classes: [],
       subjects: [],
-      preferences: request.preferences,
-      rules: request.constraints,
+      preferences: [
+        ...request.preferences.teacherPreferences,
+        ...request.preferences.roomPreferences,
+        ...request.preferences.timePreferences,
+      ],
+      rules: [
+        ...request.constraints.hard,
+        ...request.constraints.soft,
+      ],
     };
   }
 
@@ -299,10 +310,15 @@ export class OrToolsService implements ISolver {
     // In production, this would be replaced with actual OR-Tools CP-SAT integration
     
     const sessions = request.existingSessions || [];
-    const optimizedSessions = await this.optimizeSchedule(sessions, request.preferences);
+    const preferencesArray = [
+      ...request.preferences.teacherPreferences,
+      ...request.preferences.roomPreferences,
+      ...request.preferences.timePreferences,
+    ];
+    const optimizedSessions = await this.optimizeSchedule(sessions, preferencesArray);
     
     // Calculate a basic optimization score
-    const optimizationScore = this.calculateOptimizationScore(optimizedSessions, request.preferences);
+    const optimizationScore = this.calculateOptimizationScore(optimizedSessions, preferencesArray);
     
     return {
       success: true,
