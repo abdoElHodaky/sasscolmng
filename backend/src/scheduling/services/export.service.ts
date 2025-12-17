@@ -3,7 +3,7 @@ import { PrismaService } from '../../database/prisma.service';
 import { ScheduleService } from './schedule.service';
 import * as PDFDocument from 'pdfkit';
 import * as ExcelJS from 'exceljs';
-import * as ical from 'ical-generator';
+import ical from 'ical-generator';
 import * as moment from 'moment';
 
 @Injectable()

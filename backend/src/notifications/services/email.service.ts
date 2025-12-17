@@ -204,4 +204,15 @@ export class EmailService {
       return false;
     }
   }
+
+  getServiceStatus() {
+    const hasConfiguration = this.sendGridEnabled || !!this.transporter;
+    return {
+      enabled: hasConfiguration,
+      provider: this.sendGridEnabled ? 'SendGrid' : (this.transporter ? 'SMTP' : 'Not configured'),
+      configured: hasConfiguration,
+      sendGridEnabled: this.sendGridEnabled,
+      smtpEnabled: !!this.transporter,
+    };
+  }
 }
