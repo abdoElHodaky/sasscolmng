@@ -1,0 +1,190 @@
+groups:
+  - name: sasscolmng_alerts
+    rules:
+      # High-Level System Alerts
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is above 80% for more than 5 minutes on {{ $labels.instance }}"
+
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 85% on {{ $labels.instance }}"
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 10
+        for: 2m
+        labels:
+          severity: critical
+          service: system
+        annotations:
+          summary: "Low disk space"
+          description: "Disk space is below 10% on {{ $labels.instance }}"
+
+      # Application-Specific Alerts
+      - alert: APIHighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="sasscolmng-api"}[5m])) > 2
+        for: 3m
+        labels:
+          severity: warning
+          service: api
+        annotations:
+          summary: "API response time is high"
+          description: "95th percentile response time is above 2 seconds"
+
+      - alert: APIHighErrorRate
+        expr: rate(http_requests_total{job="sasscolmng-api",status=~"5.."}[5m]) / rate(http_requests_total{job="sasscolmng-api"}[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          service: api
+        annotations:
+          summary: "High API error rate"
+          description: "API error rate is above 5% for the last 5 minutes"
+
+      - alert: DatabaseConnectionFailure
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "Database is down"
+          description: "PostgreSQL database is not responding"
+
+      - alert: RedisConnectionFailure
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: warning
+          service: cache
+        annotations:
+          summary: "Redis cache is down"
+          description: "Redis cache service is not responding"
+
+      # Business Logic Alerts
+      - alert: HighNotificationFailureRate
+        expr: rate(notification_failures_total[5m]) / rate(notification_attempts_total[5m]) > 0.1
+        for: 3m
+        labels:
+          severity: warning
+          service: notifications
+        annotations:
+          summary: "High notification failure rate"
+          description: "Notification failure rate is above 10%"
+
+      - alert: SchedulingEngineTimeout
+        expr: rate(scheduling_timeouts_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          service: scheduling
+        annotations:
+          summary: "Scheduling engine timeouts"
+          description: "Scheduling engine is experiencing timeouts"
+
+      - alert: BillingProcessingErrors
+        expr: rate(billing_errors_total[5m]) > 0.05
+        for: 3m
+        labels:
+          severity: critical
+          service: billing
+        annotations:
+          summary: "Billing processing errors"
+          description: "Billing system is experiencing processing errors"
+
+      # Queue and Background Job Alerts
+      - alert: HighQueueSize
+        expr: queue_size{job="sasscolmng-api"} > 1000
+        for: 5m
+        labels:
+          severity: warning
+          service: queue
+        annotations:
+          summary: "High queue size"
+          description: "Queue size is above 1000 items"
+
+      - alert: QueueProcessingStalled
+        expr: rate(queue_processed_total[5m]) == 0 and queue_size > 0
+        for: 3m
+        labels:
+          severity: critical
+          service: queue
+        annotations:
+          summary: "Queue processing stalled"
+          description: "Queue has items but processing rate is zero"
+
+      # Security Alerts
+      - alert: HighFailedLoginAttempts
+        expr: rate(failed_login_attempts_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "High failed login attempts"
+          description: "More than 10 failed login attempts per minute"
+
+      - alert: SuspiciousAPIActivity
+        expr: rate(http_requests_total{status=~"4.."}[5m]) > 100
+        for: 2m
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "Suspicious API activity"
+          description: "High number of 4xx responses indicating potential attack"
+
+      # Performance Alerts
+      - alert: DatabaseSlowQueries
+        expr: rate(postgres_slow_queries_total[5m]) > 5
+        for: 3m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "Database slow queries detected"
+          description: "More than 5 slow queries per minute"
+
+      - alert: CacheMissRateHigh
+        expr: rate(cache_misses_total[5m]) / rate(cache_requests_total[5m]) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          service: cache
+        annotations:
+          summary: "High cache miss rate"
+          description: "Cache miss rate is above 50%"
+
+      # Tenant-Specific Alerts
+      - alert: TenantResourceExhaustion
+        expr: tenant_resource_usage_percent > 90
+        for: 5m
+        labels:
+          severity: warning
+          service: tenant
+        annotations:
+          summary: "Tenant resource exhaustion"
+          description: "Tenant {{ $labels.tenant_id }} is using over 90% of allocated resources"
+
+      - alert: TenantAPIRateLimit
+        expr: rate(tenant_rate_limited_requests_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          service: tenant
+        annotations:
+          summary: "Tenant hitting rate limits"
+          description: "Tenant {{ $labels.tenant_id }} is frequently hitting rate limits"
+
