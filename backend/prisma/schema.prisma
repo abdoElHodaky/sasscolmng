@@ -147,6 +147,7 @@ model Tenant {
   invoices      Invoice[]
   payments      Payment[]
   usageMetrics  UsageMetric[]
+  customPlans   BillingPlan[]
 
   // Notification relations
   notificationTemplates   NotificationTemplate[]
@@ -603,6 +604,12 @@ enum PaymentStatus {
   PARTIALLY_REFUNDED
 }
 
+enum PaymentGateway {
+  STRIPE
+  PAYTABS
+  PAYMOB
+}
+
 enum InvoiceStatus {
   DRAFT
   PENDING
@@ -706,18 +713,28 @@ model BillingPlan {
   features          Json            // Array of features
   limits            Json            // Usage limits
   isActive          Boolean         @default(true)
+  isCustom          Boolean         @default(false) // For dynamic tier customization
+  tenantId          String?         // For tenant-specific custom plans
   trialDays         Int?            @default(14)
   stripePriceId     String?         // Stripe price ID
   stripeProductId   String?         // Stripe product ID
+  paytabsPlanId     String?         // PayTabs plan ID
+  paymobPlanId      String?         // PayMob plan ID
+  supportedGateways PaymentGateway[] @default([STRIPE]) // Supported payment gateways
+  regionalPricing   Json?           // Regional pricing variations
   metadata          Json?
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
   // Relations
   subscriptions Subscription[]
+  tenant        Tenant?        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([type])
   @@index([isActive])
+  @@index([isCustom])
+  @@index([tenantId])
+  @@index([currency])
   @@map("billing_plans")
 }
 
@@ -734,8 +751,14 @@ model Subscription {
   trialEnd              DateTime?
   canceledAt            DateTime?
   cancelAtPeriodEnd     Boolean            @default(false)
+  paymentGateway        PaymentGateway     @default(STRIPE) // Primary payment gateway
   stripeSubscriptionId  String?            // Stripe subscription ID
   stripeCustomerId      String?            // Stripe customer ID
+  paytabsSubscriptionId String?            // PayTabs subscription ID
+  paytabsCustomerId     String?            // PayTabs customer ID
+  paymobSubscriptionId  String?            // PayMob subscription ID
+  paymobCustomerId      String?            // PayMob customer ID
+  gatewayMetadata       Json?              // Gateway-specific metadata
   metadata              Json?
   createdAt             DateTime           @default(now())
   updatedAt             DateTime           @updatedAt
@@ -794,22 +817,27 @@ model Invoice {
 }
 
 model Payment {
-  id               String        @id @default(cuid())
-  subscriptionId   String
-  invoiceId        String?
-  tenantId         String
-  amount           Decimal       @db.Decimal(10, 2)
-  currency         String        @default("USD")
-  status           PaymentStatus
-  paymentMethod    String?       // card, bank_transfer, etc.
-  stripePaymentId  String?       // Stripe payment intent ID
-  stripeChargeId   String?       // Stripe charge ID
-  failureReason    String?
-  refundedAmount   Decimal?      @db.Decimal(10, 2)
-  processedAt      DateTime?
-  metadata         Json?
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+  id                String         @id @default(cuid())
+  subscriptionId    String
+  invoiceId         String?
+  tenantId          String
+  amount            Decimal        @db.Decimal(10, 2)
+  currency          String         @default("USD")
+  status            PaymentStatus
+  paymentGateway    PaymentGateway @default(STRIPE) // Gateway used for this payment
+  paymentMethod     String?        // card, bank_transfer, etc.
+  stripePaymentId   String?        // Stripe payment intent ID
+  stripeChargeId    String?        // Stripe charge ID
+  paytabsPaymentId  String?        // PayTabs payment ID
+  paymobPaymentId   String?        // PayMob payment ID
+  gatewayReference  String?        // Gateway-specific reference
+  failureReason     String?
+  refundedAmount    Decimal?       @db.Decimal(10, 2)
+  processedAt       DateTime?
+  gatewayMetadata   Json?          // Gateway-specific metadata
+  metadata          Json?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 
   // Relations
   subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
@@ -820,6 +848,8 @@ model Payment {
   @@index([invoiceId])
   @@index([tenantId])
   @@index([status])
+  @@index([paymentGateway])
+  @@index([gatewayReference])
   @@map("payments")
 }
 
