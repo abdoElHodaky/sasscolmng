@@ -15,6 +15,24 @@ import {
   RefundOptions,
 } from '../interfaces/payment-types.interface';
 
+export interface LoadBalancingConfig {
+  enabled: boolean;
+  weight: number;
+  alternatives?: Array<{
+    gateway: PaymentGateway;
+    weight: number;
+  }>;
+}
+
+export interface TimeRestrictions {
+  timezone: string;
+  allowedHours: {
+    start: number; // 0-23
+    end: number;   // 0-23
+  };
+  allowedDays?: number[]; // 0-6 (Sunday-Saturday)
+}
+
 export interface GatewayRoutingRule {
   id: string;
   name: string;
@@ -24,10 +42,38 @@ export interface GatewayRoutingRule {
     country?: string[];
     amount?: { min?: number; max?: number };
     paymentMethod?: string[];
+    tenantTier?: string[]; // For tier-based routing
+    customerSegment?: string[]; // VIP, regular, etc.
   };
   gateway: PaymentGateway;
   fallbackGateways?: PaymentGateway[];
+  loadBalancing?: LoadBalancingConfig;
+  timeRestrictions?: TimeRestrictions;
+  requiresApproval?: boolean;
   isEnabled: boolean;
+  metadata?: Record<string, any>;
+}
+
+export interface PaymentAttemptLog {
+  id: string;
+  tenantId: string;
+  gateway: PaymentGateway;
+  event: string;
+  success: boolean;
+  errorMessage?: string;
+  amount?: number;
+  currency?: string;
+  timestamp: Date;
+  metadata?: Record<string, any>;
+}
+
+export interface GatewayPerformanceMetrics {
+  gateway: PaymentGateway;
+  successRate: number;
+  averageResponseTime: number;
+  totalTransactions: number;
+  failureReasons: Record<string, number>;
+  lastUpdated: Date;
 }
 
 export interface PaymentContext {
@@ -37,6 +83,9 @@ export interface PaymentContext {
   country?: string;
   amount?: number;
   paymentMethod?: string;
+  tenantTier?: string; // Starter, Professional, Enterprise
+  customerSegment?: string; // VIP, regular, new
+  timezone?: string;
   metadata?: Record<string, any>;
 }
 
@@ -45,12 +94,15 @@ export class PaymentOrchestratorService {
   private readonly logger = new Logger(PaymentOrchestratorService.name);
   private gateways = new Map<PaymentGateway, IPaymentGateway>();
   private routingRules: GatewayRoutingRule[] = [];
+  private performanceMetrics = new Map<PaymentGateway, GatewayPerformanceMetrics>();
+  private paymentAttempts: PaymentAttemptLog[] = [];
 
   constructor(
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
   ) {
     this.loadRoutingRules();
+    this.initializePerformanceTracking();
   }
 
   /**
@@ -62,7 +114,7 @@ export class PaymentOrchestratorService {
   }
 
   /**
-   * Get the best gateway for a given context
+   * Get the best gateway for a given context with enhanced routing
    */
   async selectGateway(context: PaymentContext): Promise<IPaymentGateway> {
     this.logger.debug(`Selecting gateway for context: ${JSON.stringify(context)}`);
@@ -76,11 +128,28 @@ export class PaymentOrchestratorService {
       throw new BadRequestException('No suitable payment gateway found for the given context');
     }
 
-    // Try primary gateway first
+    // Try each matching rule
     for (const rule of matchingRules) {
-      const gateway = this.gateways.get(rule.gateway);
+      // Check time restrictions
+      if (rule.timeRestrictions && !this.isWithinTimeRestrictions(rule.timeRestrictions)) {
+        this.logger.debug(`Rule ${rule.id} skipped due to time restrictions`);
+        continue;
+      }
+
+      // Check if approval is required for high-value transactions
+      if (rule.requiresApproval && context.amount && context.amount > 1000000) {
+        this.logger.warn(`High-value transaction requires approval: ${context.amount}`);
+        // In a real implementation, this would trigger an approval workflow
+        continue;
+      }
+
+      // Apply load balancing if enabled
+      const selectedGateway = this.applyLoadBalancing(rule);
+      const gateway = this.gateways.get(selectedGateway);
+      
       if (gateway && gateway.isEnabled() && await this.isGatewayHealthy(gateway)) {
-        this.logger.debug(`Selected primary gateway: ${rule.gateway}`);
+        this.logger.debug(`Selected gateway: ${selectedGateway} (rule: ${rule.id})`);
+        await this.updatePerformanceMetrics(selectedGateway, true);
         return gateway;
       }
 
@@ -89,11 +158,15 @@ export class PaymentOrchestratorService {
         for (const fallbackGateway of rule.fallbackGateways) {
           const fallback = this.gateways.get(fallbackGateway);
           if (fallback && fallback.isEnabled() && await this.isGatewayHealthy(fallback)) {
-            this.logger.warn(`Using fallback gateway: ${fallbackGateway} (primary: ${rule.gateway} failed)`);
+            this.logger.warn(`Using fallback gateway: ${fallbackGateway} (primary: ${selectedGateway} failed)`);
+            await this.updatePerformanceMetrics(fallbackGateway, true);
+            await this.updatePerformanceMetrics(selectedGateway, false);
             return fallback;
           }
         }
       }
+
+      await this.updatePerformanceMetrics(selectedGateway, false);
     }
 
     throw new BadRequestException('All suitable payment gateways are currently unavailable');
@@ -290,6 +363,18 @@ export class PaymentOrchestratorService {
       return false;
     }
 
+    // Check tenant tier
+    if (conditions.tenantTier && context.tenantTier && 
+        !conditions.tenantTier.includes(context.tenantTier)) {
+      return false;
+    }
+
+    // Check customer segment
+    if (conditions.customerSegment && context.customerSegment && 
+        !conditions.customerSegment.includes(context.customerSegment)) {
+      return false;
+    }
+
     return true;
   }
 
@@ -436,5 +521,263 @@ export class PaymentOrchestratorService {
     ];
 
     this.logger.log(`Loaded ${this.routingRules.length} default routing rules`);
+  }
+
+  // ==================== ENHANCED ORCHESTRATION METHODS ====================
+
+  /**
+   * Apply load balancing to select gateway based on weights
+   */
+  private applyLoadBalancing(rule: GatewayRoutingRule): PaymentGateway {
+    if (!rule.loadBalancing?.enabled || !rule.loadBalancing.alternatives) {
+      return rule.gateway;
+    }
+
+    const random = Math.random() * 100;
+    let currentWeight = 0;
+
+    // Check primary gateway weight
+    currentWeight += rule.loadBalancing.weight;
+    if (random <= currentWeight) {
+      return rule.gateway;
+    }
+
+    // Check alternative gateways
+    for (const alternative of rule.loadBalancing.alternatives) {
+      currentWeight += alternative.weight;
+      if (random <= currentWeight) {
+        return alternative.gateway;
+      }
+    }
+
+    // Fallback to primary gateway
+    return rule.gateway;
+  }
+
+  /**
+   * Check if current time is within allowed time restrictions
+   */
+  private isWithinTimeRestrictions(restrictions: TimeRestrictions): boolean {
+    const now = new Date();
+    const timezone = restrictions.timezone || 'UTC';
+    
+    // Convert to specified timezone
+    const timeInZone = new Date(now.toLocaleString('en-US', { timeZone: timezone }));
+    const currentHour = timeInZone.getHours();
+    const currentDay = timeInZone.getDay();
+
+    // Check allowed hours
+    const { start, end } = restrictions.allowedHours;
+    const isWithinHours = start <= end 
+      ? currentHour >= start && currentHour <= end
+      : currentHour >= start || currentHour <= end; // Handle overnight ranges
+
+    // Check allowed days (if specified)
+    const isWithinDays = !restrictions.allowedDays || 
+      restrictions.allowedDays.includes(currentDay);
+
+    return isWithinHours && isWithinDays;
+  }
+
+  /**
+   * Initialize performance tracking for all gateways
+   */
+  private initializePerformanceTracking(): void {
+    const gateways = [PaymentGateway.STRIPE, PaymentGateway.PAYTABS, PaymentGateway.PAYMOB];
+    
+    gateways.forEach(gateway => {
+      this.performanceMetrics.set(gateway, {
+        gateway,
+        successRate: 100,
+        averageResponseTime: 0,
+        totalTransactions: 0,
+        failureReasons: {},
+        lastUpdated: new Date(),
+      });
+    });
+  }
+
+  /**
+   * Update performance metrics for a gateway
+   */
+  private async updatePerformanceMetrics(gateway: PaymentGateway, success: boolean, responseTime?: number): Promise<void> {
+    const metrics = this.performanceMetrics.get(gateway);
+    if (!metrics) return;
+
+    metrics.totalTransactions++;
+    
+    if (success) {
+      metrics.successRate = ((metrics.successRate * (metrics.totalTransactions - 1)) + 100) / metrics.totalTransactions;
+    } else {
+      metrics.successRate = ((metrics.successRate * (metrics.totalTransactions - 1)) + 0) / metrics.totalTransactions;
+    }
+
+    if (responseTime) {
+      metrics.averageResponseTime = ((metrics.averageResponseTime * (metrics.totalTransactions - 1)) + responseTime) / metrics.totalTransactions;
+    }
+
+    metrics.lastUpdated = new Date();
+    this.performanceMetrics.set(gateway, metrics);
+  }
+
+  /**
+   * Get performance metrics for all gateways
+   */
+  async getPerformanceMetrics(): Promise<GatewayPerformanceMetrics[]> {
+    return Array.from(this.performanceMetrics.values());
+  }
+
+  /**
+   * Get payment attempt logs
+   */
+  async getPaymentAttemptLogs(tenantId?: string, limit: number = 100): Promise<PaymentAttemptLog[]> {
+    let logs = this.paymentAttempts;
+    
+    if (tenantId) {
+      logs = logs.filter(log => log.tenantId === tenantId);
+    }
+    
+    return logs
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+      .slice(0, limit);
+  }
+
+  /**
+   * Enhanced routing rule management
+   */
+  async createRoutingRule(rule: Omit<GatewayRoutingRule, 'id'>): Promise<GatewayRoutingRule> {
+    const newRule: GatewayRoutingRule = {
+      ...rule,
+      id: `rule_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    };
+
+    this.routingRules.push(newRule);
+    this.routingRules.sort((a, b) => a.priority - b.priority);
+    
+    this.logger.log(`Created new routing rule: ${newRule.id}`);
+    return newRule;
+  }
+
+  /**
+   * Update existing routing rule
+   */
+  async updateRoutingRule(ruleId: string, updates: Partial<GatewayRoutingRule>): Promise<GatewayRoutingRule | null> {
+    const ruleIndex = this.routingRules.findIndex(rule => rule.id === ruleId);
+    
+    if (ruleIndex === -1) {
+      return null;
+    }
+
+    this.routingRules[ruleIndex] = { ...this.routingRules[ruleIndex], ...updates };
+    this.routingRules.sort((a, b) => a.priority - b.priority);
+    
+    this.logger.log(`Updated routing rule: ${ruleId}`);
+    return this.routingRules[ruleIndex];
+  }
+
+  /**
+   * Delete routing rule
+   */
+  async deleteRoutingRule(ruleId: string): Promise<boolean> {
+    const ruleIndex = this.routingRules.findIndex(rule => rule.id === ruleId);
+    
+    if (ruleIndex === -1) {
+      return false;
+    }
+
+    this.routingRules.splice(ruleIndex, 1);
+    this.logger.log(`Deleted routing rule: ${ruleId}`);
+    return true;
+  }
+
+  /**
+   * Get all routing rules
+   */
+  async getRoutingRules(): Promise<GatewayRoutingRule[]> {
+    return [...this.routingRules];
+  }
+
+  /**
+   * Test gateway selection for a given context without executing
+   */
+  async testGatewaySelection(context: PaymentContext): Promise<{
+    selectedGateway: PaymentGateway;
+    matchedRule: GatewayRoutingRule;
+    alternativeGateways: PaymentGateway[];
+    reasoning: string[];
+  }> {
+    const reasoning: string[] = [];
+    
+    // Find matching routing rules
+    const matchingRules = this.routingRules
+      .filter(rule => {
+        const matches = rule.isEnabled && this.ruleMatches(rule, context);
+        if (matches) {
+          reasoning.push(`Rule "${rule.name}" matches context`);
+        }
+        return matches;
+      })
+      .sort((a, b) => a.priority - b.priority);
+
+    if (matchingRules.length === 0) {
+      throw new BadRequestException('No suitable payment gateway found for the given context');
+    }
+
+    const selectedRule = matchingRules[0];
+    reasoning.push(`Selected rule: "${selectedRule.name}" (priority: ${selectedRule.priority})`);
+
+    // Apply load balancing
+    const selectedGateway = this.applyLoadBalancing(selectedRule);
+    reasoning.push(`Load balancing selected: ${selectedGateway}`);
+
+    // Get alternative gateways
+    const alternativeGateways = selectedRule.fallbackGateways || [];
+
+    return {
+      selectedGateway,
+      matchedRule: selectedRule,
+      alternativeGateways,
+      reasoning,
+    };
+  }
+
+  /**
+   * Enhanced payment attempt logging
+   */
+  private async logPaymentAttempt(
+    tenantId: string,
+    gateway: PaymentGateway,
+    event: string,
+    success: boolean,
+    errorMessage?: string,
+    amount?: number,
+    currency?: string,
+    metadata?: Record<string, any>,
+  ): Promise<void> {
+    try {
+      const logEntry: PaymentAttemptLog = {
+        id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        tenantId,
+        gateway,
+        event,
+        success,
+        errorMessage,
+        amount,
+        currency,
+        timestamp: new Date(),
+        metadata,
+      };
+
+      this.paymentAttempts.push(logEntry);
+      
+      // Keep only last 1000 logs in memory
+      if (this.paymentAttempts.length > 1000) {
+        this.paymentAttempts = this.paymentAttempts.slice(-1000);
+      }
+
+      this.logger.log(`Payment attempt: ${tenantId} | ${gateway} | ${event} | ${success ? 'SUCCESS' : 'FAILED'} ${errorMessage ? `| ${errorMessage}` : ''}`);
+    } catch (error) {
+      this.logger.error('Failed to log payment attempt:', error);
+    }
   }
 }
