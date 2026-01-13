@@ -2,6 +2,7 @@ import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../database/prisma.service';
 import { IPaymentGateway } from '../interfaces/payment-gateway.interface';
+import { CurrencyConversionService, CurrencyConversionResult } from './currency-conversion.service';
 import {
   PaymentGateway,
   PaymentGatewayResponse,
@@ -100,6 +101,7 @@ export class PaymentOrchestratorService {
   constructor(
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
+    private readonly currencyService: CurrencyConversionService,
   ) {
     this.loadRoutingRules();
     this.initializePerformanceTracking();
@@ -891,5 +893,315 @@ export class PaymentOrchestratorService {
     } catch (error) {
       this.logger.error('Failed to log payment attempt:', error);
     }
+  }
+
+  // ==================== MULTI-CURRENCY SUPPORT METHODS ====================
+
+  /**
+   * Create payment intent with currency conversion support
+   */
+  async createPaymentIntentWithConversion(
+    options: CreatePaymentIntentOptions & {
+      targetCurrency?: string;
+      tenantRegion?: string;
+    }
+  ): Promise<PaymentGatewayResponse<PaymentIntentData & { conversionDetails?: CurrencyConversionResult }>> {
+    try {
+      const { targetCurrency, tenantRegion, ...paymentOptions } = options;
+      let conversionDetails: CurrencyConversionResult | undefined;
+
+      // If target currency is specified and different from original, convert
+      if (targetCurrency && targetCurrency !== paymentOptions.currency) {
+        this.logger.log(`Converting payment from ${paymentOptions.currency} to ${targetCurrency}`);
+        
+        conversionDetails = await this.currencyService.convertCurrency({
+          amount: paymentOptions.amount,
+          fromCurrency: paymentOptions.currency,
+          toCurrency: targetCurrency,
+          tenantId: options.tenantId,
+        });
+
+        // Update payment options with converted amount and currency
+        paymentOptions.amount = conversionDetails.totalAmount;
+        paymentOptions.currency = targetCurrency;
+        
+        // Add conversion metadata
+        paymentOptions.metadata = {
+          ...paymentOptions.metadata,
+          originalAmount: conversionDetails.originalAmount,
+          originalCurrency: conversionDetails.fromCurrency,
+          exchangeRate: conversionDetails.exchangeRate,
+          conversionFee: conversionDetails.conversionFee,
+          conversionSource: conversionDetails.source,
+        };
+      }
+
+      // Calculate tax if region is specified
+      if (tenantRegion) {
+        const taxInfo = this.currencyService.calculateTax(
+          paymentOptions.amount,
+          paymentOptions.currency,
+          tenantRegion
+        );
+
+        if (taxInfo.taxAmount > 0) {
+          paymentOptions.amount += taxInfo.taxAmount;
+          paymentOptions.metadata = {
+            ...paymentOptions.metadata,
+            taxAmount: taxInfo.taxAmount,
+            taxRate: taxInfo.taxRate,
+            taxName: taxInfo.taxName,
+            taxRegion: tenantRegion,
+          };
+        }
+      }
+
+      // Create payment context for gateway selection
+      const context: PaymentContext = {
+        amount: paymentOptions.amount,
+        currency: paymentOptions.currency,
+        country: this.getCountryFromRegion(tenantRegion),
+        paymentMethod: 'card', // Default, could be passed in options
+        tenantId: options.tenantId,
+      };
+
+      // Select appropriate gateway
+      const gateway = await this.selectGateway(context);
+
+      // Create payment intent
+      const result = await gateway.createPaymentIntent(paymentOptions);
+
+      if (result.success && conversionDetails) {
+        return {
+          ...result,
+          data: {
+            ...result.data!,
+            conversionDetails,
+          },
+        };
+      }
+
+      return result;
+    } catch (error) {
+      this.logger.error('Failed to create payment intent with conversion:', error);
+      return {
+        success: false,
+        error: {
+          code: 'PAYMENT_INTENT_CONVERSION_FAILED',
+          message: error.message,
+          details: error,
+        },
+      };
+    }
+  }
+
+  /**
+   * Get supported currencies for a specific gateway
+   */
+  async getSupportedCurrencies(gateway?: PaymentGateway): Promise<string[]> {
+    if (gateway) {
+      const gatewayInstance = this.gateways.get(gateway);
+      if (gatewayInstance) {
+        return gatewayInstance.getSupportedCurrencies();
+      }
+      return [];
+    }
+
+    // Return all supported currencies across all gateways
+    const allCurrencies = new Set<string>();
+    
+    for (const gatewayInstance of this.gateways.values()) {
+      const currencies = gatewayInstance.getSupportedCurrencies();
+      currencies.forEach(currency => allCurrencies.add(currency));
+    }
+
+    return Array.from(allCurrencies);
+  }
+
+  /**
+   * Get optimal gateway for a currency and region
+   */
+  async getOptimalGatewayForCurrency(
+    currency: string,
+    region?: string,
+    amount?: number
+  ): Promise<{
+    gateway: PaymentGateway;
+    reasoning: string;
+    alternatives: PaymentGateway[];
+  }> {
+    const context: PaymentContext = {
+      currency,
+      country: this.getCountryFromRegion(region),
+      amount: amount || 100, // Default amount for testing
+    };
+
+    try {
+      const testResult = await this.testGatewaySelection(context);
+      
+      return {
+        gateway: testResult.selectedGateway,
+        reasoning: testResult.reasoning.join('; '),
+        alternatives: testResult.alternativeGateways,
+      };
+    } catch (error) {
+      this.logger.error(`Failed to get optimal gateway for ${currency}:`, error);
+      
+      // Fallback to first available gateway that supports the currency
+      for (const [gatewayType, gatewayInstance] of this.gateways.entries()) {
+        if (gatewayInstance.getSupportedCurrencies().includes(currency)) {
+          return {
+            gateway: gatewayType,
+            reasoning: 'Fallback selection - first available gateway supporting currency',
+            alternatives: [],
+          };
+        }
+      }
+
+      throw new Error(`No gateway supports currency: ${currency}`);
+    }
+  }
+
+  /**
+   * Get exchange rate between two currencies
+   */
+  async getExchangeRate(fromCurrency: string, toCurrency: string): Promise<{
+    rate: number;
+    source: string;
+    timestamp: Date;
+    validUntil: Date;
+  }> {
+    const exchangeRate = await this.currencyService.getExchangeRate(fromCurrency, toCurrency);
+    
+    return {
+      rate: exchangeRate.rate,
+      source: exchangeRate.source,
+      timestamp: exchangeRate.timestamp,
+      validUntil: exchangeRate.validUntil,
+    };
+  }
+
+  /**
+   * Calculate total cost including conversion and taxes
+   */
+  async calculateTotalCost(
+    amount: number,
+    fromCurrency: string,
+    toCurrency: string,
+    region?: string
+  ): Promise<{
+    originalAmount: number;
+    convertedAmount: number;
+    conversionFee: number;
+    taxAmount: number;
+    totalAmount: number;
+    breakdown: {
+      baseAmount: number;
+      conversionFee: number;
+      taxAmount: number;
+      total: number;
+    };
+    currency: string;
+  }> {
+    let convertedAmount = amount;
+    let conversionFee = 0;
+
+    // Convert currency if needed
+    if (fromCurrency !== toCurrency) {
+      const conversion = await this.currencyService.convertCurrency({
+        amount,
+        fromCurrency,
+        toCurrency,
+      });
+      
+      convertedAmount = conversion.convertedAmount;
+      conversionFee = conversion.conversionFee;
+    }
+
+    // Calculate tax
+    let taxAmount = 0;
+    if (region) {
+      const taxInfo = this.currencyService.calculateTax(convertedAmount, toCurrency, region);
+      taxAmount = taxInfo.taxAmount;
+    }
+
+    const totalAmount = convertedAmount + conversionFee + taxAmount;
+
+    return {
+      originalAmount: amount,
+      convertedAmount,
+      conversionFee,
+      taxAmount,
+      totalAmount,
+      breakdown: {
+        baseAmount: convertedAmount,
+        conversionFee,
+        taxAmount,
+        total: totalAmount,
+      },
+      currency: toCurrency,
+    };
+  }
+
+  /**
+   * Get currency information
+   */
+  getCurrencyInfo(currencyCode: string) {
+    return this.currencyService.getCurrencyInfo(currencyCode);
+  }
+
+  /**
+   * Format amount according to currency rules
+   */
+  formatAmount(amount: number, currencyCode: string): string {
+    return this.currencyService.formatAmount(amount, currencyCode);
+  }
+
+  /**
+   * Get regional tax information
+   */
+  getRegionalTaxInfo() {
+    return this.currencyService.getRegionalTaxInfo();
+  }
+
+  /**
+   * Clear currency conversion cache
+   */
+  clearCurrencyCache(): void {
+    this.currencyService.clearCache();
+    this.logger.log('Currency conversion cache cleared');
+  }
+
+  /**
+   * Get currency conversion cache statistics
+   */
+  getCurrencyCacheStats() {
+    return this.currencyService.getCacheStats();
+  }
+
+  // ==================== PRIVATE HELPER METHODS ====================
+
+  /**
+   * Get country code from region
+   */
+  private getCountryFromRegion(region?: string): string | undefined {
+    if (!region) return undefined;
+
+    const regionToCountryMap: Record<string, string> = {
+      'US': 'US',
+      'EU': 'DE', // Default to Germany for EU
+      'GB': 'GB',
+      'SA': 'SA',
+      'AE': 'AE',
+      'KW': 'KW',
+      'QA': 'QA',
+      'BH': 'BH',
+      'EG': 'EG',
+      'CA': 'CA',
+      'AU': 'AU',
+      'JP': 'JP',
+    };
+
+    return regionToCountryMap[region];
   }
 }
