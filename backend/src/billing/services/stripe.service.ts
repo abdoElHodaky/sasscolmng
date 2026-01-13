@@ -1,5 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { IPaymentGateway } from '../interfaces/payment-gateway.interface';
+import {
+  PaymentGateway,
+  PaymentGatewayResponse,
+  CustomerData,
+  PaymentIntentData,
+  SubscriptionData,
+  CreateCustomerOptions,
+  CreatePaymentIntentOptions,
+  CreateSubscriptionOptions,
+  UpdateSubscriptionOptions,
+  RefundOptions,
+  WebhookEvent,
+} from '../interfaces/payment-types.interface';
 // import Stripe from 'stripe'; // TODO: Install stripe package
 
 export interface StripeCustomer {
@@ -51,7 +65,7 @@ export interface CreatePaymentIntentOptions {
 }
 
 @Injectable()
-export class StripeService {
+export class StripeService implements IPaymentGateway {
   private readonly logger = new Logger(StripeService.name);
   // private stripe: Stripe; // TODO: Uncomment when stripe is installed
   private readonly isEnabled: boolean;
@@ -81,7 +95,7 @@ export class StripeService {
   /**
    * Create a new Stripe customer
    */
-  async createCustomer(options: CreateCustomerOptions): Promise<StripeCustomer> {
+  async createStripeCustomer(options: CreateCustomerOptions): Promise<StripeCustomer> {
     if (!this.isEnabled) {
       throw new Error('Stripe service is not configured');
     }
@@ -177,7 +191,7 @@ export class StripeService {
   /**
    * Create a subscription
    */
-  async createSubscription(options: CreateSubscriptionOptions): Promise<StripeSubscription> {
+  async createStripeSubscription(options: CreateSubscriptionOptions): Promise<StripeSubscription> {
     if (!this.isEnabled) {
       throw new Error('Stripe service is not configured');
     }
@@ -249,7 +263,7 @@ export class StripeService {
   /**
    * Cancel a subscription
    */
-  async cancelSubscription(subscriptionId: string, cancelAtPeriodEnd = true): Promise<StripeSubscription> {
+  async cancelStripeSubscription(subscriptionId: string, cancelAtPeriodEnd = true): Promise<StripeSubscription> {
     if (!this.isEnabled) {
       throw new Error('Stripe service is not configured');
     }
@@ -284,7 +298,7 @@ export class StripeService {
   /**
    * Update a subscription
    */
-  async updateSubscription(subscriptionId: string, options: { priceId?: string; cancelAtPeriodEnd?: boolean; prorationBehavior?: string }): Promise<StripeSubscription> {
+  async updateStripeSubscription(subscriptionId: string, options: { priceId?: string; cancelAtPeriodEnd?: boolean; prorationBehavior?: string }): Promise<StripeSubscription> {
     if (!this.isEnabled) {
       throw new Error('Stripe service is not configured');
     }
@@ -317,7 +331,7 @@ export class StripeService {
   /**
    * Create a payment intent
    */
-  async createPaymentIntent(options: CreatePaymentIntentOptions): Promise<StripePaymentIntent> {
+  async createStripePaymentIntent(options: CreatePaymentIntentOptions): Promise<StripePaymentIntent> {
     if (!this.isEnabled) {
       throw new Error('Stripe service is not configured');
     }
@@ -450,6 +464,541 @@ export class StripeService {
         paymentIntents: true,
         webhooks: true,
       },
+    };
+  }
+
+  // ==================== PAYMENT GATEWAY INTERFACE IMPLEMENTATION ====================
+
+  /**
+   * Get the gateway type
+   */
+  getGateway(): PaymentGateway {
+    return PaymentGateway.STRIPE;
+  }
+
+  /**
+   * Check if the gateway is enabled
+   */
+  isEnabled(): boolean {
+    return this.isEnabled;
+  }
+
+  /**
+   * Get supported currencies
+   */
+  getSupportedCurrencies(): string[] {
+    return [
+      'USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CHF', 'SEK', 'NOK', 'DKK',
+      'PLN', 'CZK', 'HUF', 'BGN', 'RON', 'HRK', 'ISK', 'MXN', 'BRL', 'SGD',
+      'HKD', 'NZD', 'MYR', 'THB', 'PHP', 'INR', 'KRW', 'TWD', 'IDR', 'VND',
+      // Add more currencies as needed
+    ];
+  }
+
+  /**
+   * Get supported countries
+   */
+  getSupportedCountries(): string[] {
+    return [
+      'US', 'CA', 'GB', 'IE', 'AU', 'NZ', 'FR', 'DE', 'ES', 'IT', 'NL', 'BE',
+      'AT', 'CH', 'SE', 'NO', 'DK', 'FI', 'PL', 'CZ', 'SK', 'HU', 'SI', 'EE',
+      'LV', 'LT', 'BG', 'RO', 'HR', 'CY', 'MT', 'LU', 'PT', 'GR', 'IS', 'LI',
+      'JP', 'SG', 'HK', 'MY', 'TH', 'PH', 'ID', 'VN', 'IN', 'KR', 'TW', 'MX',
+      'BR', 'AR', 'CL', 'CO', 'PE', 'UY', 'EC', 'BO', 'PY', 'CR', 'GT', 'PA',
+      'ZA', 'KE', 'NG', 'GH', 'EG', 'MA', 'TN', 'IL', 'AE', 'SA', 'JO', 'LB',
+      // Stripe supports 195+ countries
+    ];
+  }
+
+  /**
+   * Get supported payment methods
+   */
+  getSupportedPaymentMethods(): string[] {
+    return [
+      'card',
+      'apple_pay',
+      'google_pay',
+      'link',
+      'paypal',
+      'klarna',
+      'afterpay_clearpay',
+      'alipay',
+      'bancontact',
+      'eps',
+      'giropay',
+      'ideal',
+      'p24',
+      'sepa_debit',
+      'sofort',
+      'wechat_pay',
+      'affirm',
+      'au_becs_debit',
+      'bacs_debit',
+      'boleto',
+      'fpx',
+      'grabpay',
+      'oxxo',
+      'promptpay',
+      'us_bank_account',
+    ];
+  }
+
+  /**
+   * Perform health check
+   */
+  async healthCheck(): Promise<boolean> {
+    return await this.testConnection();
+  }
+
+  /**
+   * Create customer using the interface
+   */
+  async createCustomer(options: CreateCustomerOptions): Promise<PaymentGatewayResponse<CustomerData>> {
+    try {
+      // Call the original Stripe-specific method
+      const stripeCustomer = await this.createStripeCustomer({
+        email: options.email,
+        name: options.name,
+        phone: options.phone,
+        metadata: options.metadata,
+      });
+
+      const customerData: CustomerData = {
+        id: stripeCustomer.id,
+        email: stripeCustomer.email,
+        name: stripeCustomer.name,
+        phone: options.phone,
+        metadata: stripeCustomer.metadata,
+        gateway: PaymentGateway.STRIPE,
+        gatewayCustomerId: stripeCustomer.id,
+        createdAt: new Date(),
+      };
+
+      return {
+        success: true,
+        data: customerData,
+      };
+    } catch (error) {
+      this.logger.error('Failed to create customer via interface:', error);
+      return {
+        success: false,
+        error: {
+          code: 'CUSTOMER_CREATION_FAILED',
+          message: error.message,
+          details: error,
+        },
+      };
+    }
+  }
+
+  /**
+   * Create payment intent using the interface
+   */
+  async createPaymentIntent(options: CreatePaymentIntentOptions): Promise<PaymentGatewayResponse<PaymentIntentData>> {
+    try {
+      const stripePaymentIntent = await this.createStripePaymentIntent({
+        amount: options.amount,
+        currency: options.currency,
+        customerId: options.customerId,
+        metadata: options.metadata,
+        description: options.description,
+      });
+
+      const paymentIntentData: PaymentIntentData = {
+        id: stripePaymentIntent.id,
+        amount: stripePaymentIntent.amount,
+        currency: stripePaymentIntent.currency,
+        status: this.mapStripeStatusToStandard(stripePaymentIntent.status),
+        clientSecret: stripePaymentIntent.clientSecret,
+        customerId: options.customerId,
+        gateway: PaymentGateway.STRIPE,
+        gatewayPaymentId: stripePaymentIntent.id,
+        metadata: options.metadata,
+        createdAt: new Date(),
+      };
+
+      return {
+        success: true,
+        data: paymentIntentData,
+      };
+    } catch (error) {
+      this.logger.error('Failed to create payment intent via interface:', error);
+      return {
+        success: false,
+        error: {
+          code: 'PAYMENT_INTENT_CREATION_FAILED',
+          message: error.message,
+          details: error,
+        },
+      };
+    }
+  }
+
+  /**
+   * Create subscription using the interface
+   */
+  async createSubscription(options: CreateSubscriptionOptions): Promise<PaymentGatewayResponse<SubscriptionData>> {
+    try {
+      const stripeSubscription = await this.createStripeSubscription({
+        customerId: options.customerId,
+        priceId: options.planId,
+        metadata: options.metadata,
+        trialPeriodDays: options.trialPeriodDays,
+      });
+
+      const subscriptionData: SubscriptionData = {
+        id: stripeSubscription.id,
+        customerId: stripeSubscription.customerId,
+        planId: stripeSubscription.priceId,
+        status: this.mapStripeSubscriptionStatusToStandard(stripeSubscription.status),
+        currentPeriodStart: stripeSubscription.currentPeriodStart,
+        currentPeriodEnd: stripeSubscription.currentPeriodEnd,
+        cancelAtPeriodEnd: stripeSubscription.cancelAtPeriodEnd,
+        gateway: PaymentGateway.STRIPE,
+        gatewaySubscriptionId: stripeSubscription.id,
+        metadata: stripeSubscription.metadata,
+        createdAt: new Date(),
+      };
+
+      return {
+        success: true,
+        data: subscriptionData,
+      };
+    } catch (error) {
+      this.logger.error('Failed to create subscription via interface:', error);
+      return {
+        success: false,
+        error: {
+          code: 'SUBSCRIPTION_CREATION_FAILED',
+          message: error.message,
+          details: error,
+        },
+      };
+    }
+  }
+
+  /**
+   * Update subscription using the interface
+   */
+  async updateSubscription(options: UpdateSubscriptionOptions): Promise<PaymentGatewayResponse<SubscriptionData>> {
+    try {
+      const stripeSubscription = await this.updateStripeSubscription(options.subscriptionId, {
+        priceId: options.planId,
+        cancelAtPeriodEnd: options.cancelAtPeriodEnd,
+        prorationBehavior: options.prorationBehavior,
+      });
+
+      const subscriptionData: SubscriptionData = {
+        id: stripeSubscription.id,
+        customerId: stripeSubscription.customerId,
+        planId: stripeSubscription.priceId,
+        status: this.mapStripeSubscriptionStatusToStandard(stripeSubscription.status),
+        currentPeriodStart: stripeSubscription.currentPeriodStart,
+        currentPeriodEnd: stripeSubscription.currentPeriodEnd,
+        cancelAtPeriodEnd: stripeSubscription.cancelAtPeriodEnd,
+        gateway: PaymentGateway.STRIPE,
+        gatewaySubscriptionId: stripeSubscription.id,
+        metadata: stripeSubscription.metadata,
+        updatedAt: new Date(),
+      };
+
+      return {
+        success: true,
+        data: subscriptionData,
+      };
+    } catch (error) {
+      this.logger.error('Failed to update subscription via interface:', error);
+      return {
+        success: false,
+        error: {
+          code: 'SUBSCRIPTION_UPDATE_FAILED',
+          message: error.message,
+          details: error,
+        },
+      };
+    }
+  }
+
+  /**
+   * Cancel subscription using the interface
+   */
+  async cancelSubscription(subscriptionId: string, cancelAtPeriodEnd: boolean = true): Promise<PaymentGatewayResponse<SubscriptionData>> {
+    try {
+      const stripeSubscription = await this.cancelStripeSubscription(subscriptionId, cancelAtPeriodEnd);
+
+      const subscriptionData: SubscriptionData = {
+        id: stripeSubscription.id,
+        customerId: stripeSubscription.customerId,
+        planId: stripeSubscription.priceId,
+        status: this.mapStripeSubscriptionStatusToStandard(stripeSubscription.status),
+        currentPeriodStart: stripeSubscription.currentPeriodStart,
+        currentPeriodEnd: stripeSubscription.currentPeriodEnd,
+        cancelAtPeriodEnd: stripeSubscription.cancelAtPeriodEnd,
+        gateway: PaymentGateway.STRIPE,
+        gatewaySubscriptionId: stripeSubscription.id,
+        metadata: stripeSubscription.metadata,
+        canceledAt: new Date(),
+      };
+
+      return {
+        success: true,
+        data: subscriptionData,
+      };
+    } catch (error) {
+      this.logger.error('Failed to cancel subscription via interface:', error);
+      return {
+        success: false,
+        error: {
+          code: 'SUBSCRIPTION_CANCELLATION_FAILED',
+          message: error.message,
+          details: error,
+        },
+      };
+    }
+  }
+
+  /**
+   * Process refund using the interface
+   */
+  async refundPayment(options: RefundOptions): Promise<PaymentGatewayResponse<any>> {
+    try {
+      // TODO: Implement actual Stripe refund when package is installed
+      // const refund = await this.stripe.refunds.create({
+      //   payment_intent: options.paymentIntentId,
+      //   amount: options.amount,
+      //   reason: options.reason,
+      //   metadata: options.metadata,
+      // });
+
+      // For now, simulate refund
+      this.logger.log(`[SIMULATED] Created refund for payment ${options.paymentIntentId}`);
+
+      const refundData = {
+        id: `re_sim_${Date.now()}`,
+        paymentIntentId: options.paymentIntentId,
+        amount: options.amount,
+        currency: 'usd', // Would come from original payment
+        status: 'succeeded',
+        reason: options.reason,
+        gateway: PaymentGateway.STRIPE,
+        createdAt: new Date(),
+      };
+
+      return {
+        success: true,
+        data: refundData,
+      };
+    } catch (error) {
+      this.logger.error('Failed to process refund via interface:', error);
+      return {
+        success: false,
+        error: {
+          code: 'REFUND_FAILED',
+          message: error.message,
+          details: error,
+        },
+      };
+    }
+  }
+
+  /**
+   * Parse webhook event using the interface
+   */
+  async parseWebhookEvent(payload: string, signature: string): Promise<PaymentGatewayResponse<WebhookEvent>> {
+    try {
+      const stripeEvent = await this.handleWebhook(payload, signature);
+
+      const webhookEvent: WebhookEvent = {
+        id: stripeEvent.id,
+        type: stripeEvent.type,
+        gateway: PaymentGateway.STRIPE,
+        data: stripeEvent.data,
+        createdAt: new Date(),
+      };
+
+      return {
+        success: true,
+        data: webhookEvent,
+      };
+    } catch (error) {
+      this.logger.error('Failed to parse webhook event via interface:', error);
+      return {
+        success: false,
+        error: {
+          code: 'WEBHOOK_PARSING_FAILED',
+          message: error.message,
+          details: error,
+        },
+      };
+    }
+  }
+
+  /**
+   * Handle webhook event using the interface
+   */
+  async handleWebhookEvent(event: WebhookEvent): Promise<PaymentGatewayResponse<any>> {
+    try {
+      this.logger.log(`Processing Stripe webhook event: ${event.type}`);
+
+      // Handle different event types
+      switch (event.type) {
+        case 'payment_intent.succeeded':
+          return await this.handlePaymentIntentSucceeded(event);
+        case 'payment_intent.payment_failed':
+          return await this.handlePaymentIntentFailed(event);
+        case 'invoice.payment_succeeded':
+          return await this.handleInvoicePaymentSucceeded(event);
+        case 'invoice.payment_failed':
+          return await this.handleInvoicePaymentFailed(event);
+        case 'customer.subscription.created':
+        case 'customer.subscription.updated':
+        case 'customer.subscription.deleted':
+          return await this.handleSubscriptionEvent(event);
+        default:
+          this.logger.log(`Unhandled Stripe webhook event type: ${event.type}`);
+          return {
+            success: true,
+            data: { message: 'Event acknowledged but not processed' },
+          };
+      }
+    } catch (error) {
+      this.logger.error('Failed to handle webhook event via interface:', error);
+      return {
+        success: false,
+        error: {
+          code: 'WEBHOOK_HANDLING_FAILED',
+          message: error.message,
+          details: error,
+        },
+      };
+    }
+  }
+
+  /**
+   * Verify webhook signature
+   */
+  verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
+    try {
+      // TODO: Implement actual Stripe signature verification when package is installed
+      // this.stripe.webhooks.constructEvent(payload, signature, secret);
+      
+      // For now, simulate verification
+      this.logger.log('[SIMULATED] Verified Stripe webhook signature');
+      return true;
+    } catch (error) {
+      this.logger.error('Webhook signature verification failed:', error);
+      return false;
+    }
+  }
+
+  // ==================== PRIVATE HELPER METHODS ====================
+
+  /**
+   * Map Stripe payment intent status to standard status
+   */
+  private mapStripeStatusToStandard(stripeStatus: string): string {
+    const statusMap: Record<string, string> = {
+      'requires_payment_method': 'pending',
+      'requires_confirmation': 'pending',
+      'requires_action': 'pending',
+      'processing': 'processing',
+      'requires_capture': 'authorized',
+      'canceled': 'canceled',
+      'succeeded': 'succeeded',
+    };
+
+    return statusMap[stripeStatus] || stripeStatus;
+  }
+
+  /**
+   * Map Stripe subscription status to standard status
+   */
+  private mapStripeSubscriptionStatusToStandard(stripeStatus: string): string {
+    const statusMap: Record<string, string> = {
+      'incomplete': 'pending',
+      'incomplete_expired': 'failed',
+      'trialing': 'trialing',
+      'active': 'active',
+      'past_due': 'past_due',
+      'canceled': 'canceled',
+      'unpaid': 'unpaid',
+    };
+
+    return statusMap[stripeStatus] || stripeStatus;
+  }
+
+  /**
+   * Handle payment intent succeeded event
+   */
+  private async handlePaymentIntentSucceeded(event: WebhookEvent): Promise<PaymentGatewayResponse<any>> {
+    this.logger.log(`Payment intent succeeded: ${event.data.object.id}`);
+    
+    // TODO: Update payment status in database
+    // TODO: Trigger any post-payment workflows
+    
+    return {
+      success: true,
+      data: { message: 'Payment intent succeeded processed' },
+    };
+  }
+
+  /**
+   * Handle payment intent failed event
+   */
+  private async handlePaymentIntentFailed(event: WebhookEvent): Promise<PaymentGatewayResponse<any>> {
+    this.logger.log(`Payment intent failed: ${event.data.object.id}`);
+    
+    // TODO: Update payment status in database
+    // TODO: Trigger failure notifications
+    
+    return {
+      success: true,
+      data: { message: 'Payment intent failed processed' },
+    };
+  }
+
+  /**
+   * Handle invoice payment succeeded event
+   */
+  private async handleInvoicePaymentSucceeded(event: WebhookEvent): Promise<PaymentGatewayResponse<any>> {
+    this.logger.log(`Invoice payment succeeded: ${event.data.object.id}`);
+    
+    // TODO: Update subscription status
+    // TODO: Activate subscription features
+    
+    return {
+      success: true,
+      data: { message: 'Invoice payment succeeded processed' },
+    };
+  }
+
+  /**
+   * Handle invoice payment failed event
+   */
+  private async handleInvoicePaymentFailed(event: WebhookEvent): Promise<PaymentGatewayResponse<any>> {
+    this.logger.log(`Invoice payment failed: ${event.data.object.id}`);
+    
+    // TODO: Handle failed subscription payment
+    // TODO: Trigger dunning management
+    
+    return {
+      success: true,
+      data: { message: 'Invoice payment failed processed' },
+    };
+  }
+
+  /**
+   * Handle subscription events
+   */
+  private async handleSubscriptionEvent(event: WebhookEvent): Promise<PaymentGatewayResponse<any>> {
+    this.logger.log(`Subscription event: ${event.type} for ${event.data.object.id}`);
+    
+    // TODO: Update subscription in database
+    // TODO: Handle subscription lifecycle changes
+    
+    return {
+      success: true,
+      data: { message: 'Subscription event processed' },
     };
   }
 }
