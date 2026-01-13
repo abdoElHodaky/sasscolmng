@@ -481,19 +481,59 @@ export class PaymentOrchestratorService {
   }
 
   private loadRoutingRules(): void {
-    // Default routing rules - these would typically be loaded from database or config
+    // Enhanced routing rules with load balancing and advanced conditions
     this.routingRules = [
+      // High-value transaction rule (highest priority)
+      {
+        id: 'high-value-transactions',
+        name: 'High Value Transactions',
+        priority: 0,
+        conditions: {
+          currency: ['USD', 'EUR', 'GBP'],
+          amount: { min: 1000000 }, // $10,000+
+        },
+        gateway: PaymentGateway.STRIPE,
+        fallbackGateways: [],
+        requiresApproval: true,
+        loadBalancing: {
+          enabled: false,
+          weight: 100,
+        },
+        isEnabled: true,
+        metadata: {
+          description: 'High-value transactions requiring manual approval',
+          riskLevel: 'high',
+        },
+      },
+      // Stripe global with load balancing
       {
         id: 'stripe-global',
         name: 'Stripe Global',
         priority: 1,
         conditions: {
-          currency: ['USD', 'EUR', 'GBP'],
+          currency: ['USD', 'EUR', 'GBP', 'CAD', 'AUD'],
+          amount: { min: 100, max: 1000000 }, // $1.00 to $10,000
         },
         gateway: PaymentGateway.STRIPE,
         fallbackGateways: [PaymentGateway.PAYTABS],
+        loadBalancing: {
+          enabled: true,
+          weight: 80, // 80% of traffic
+          alternatives: [
+            { gateway: PaymentGateway.PAYTABS, weight: 20 }
+          ]
+        },
+        timeRestrictions: {
+          timezone: 'UTC',
+          allowedHours: { start: 0, end: 24 }, // 24/7
+        },
         isEnabled: true,
+        metadata: {
+          description: 'Primary global payment processing',
+          supportedMethods: ['card', 'apple_pay', 'google_pay'],
+        },
       },
+      // PayTabs MENA with time restrictions
       {
         id: 'paytabs-mena',
         name: 'PayTabs MENA',
@@ -501,11 +541,25 @@ export class PaymentOrchestratorService {
         conditions: {
           currency: ['SAR', 'AED', 'KWD', 'QAR', 'BHD'],
           country: ['SA', 'AE', 'KW', 'QA', 'BH'],
+          paymentMethod: ['card', 'mada', 'stcpay'],
         },
         gateway: PaymentGateway.PAYTABS,
         fallbackGateways: [PaymentGateway.STRIPE],
+        loadBalancing: {
+          enabled: false,
+          weight: 100,
+        },
+        timeRestrictions: {
+          timezone: 'Asia/Riyadh',
+          allowedHours: { start: 6, end: 23 }, // 6 AM to 11 PM local time
+        },
         isEnabled: true,
+        metadata: {
+          description: 'Middle East payment processing',
+          localMethods: ['mada', 'stcpay'],
+        },
       },
+      // PayMob Egypt with load balancing
       {
         id: 'paymob-egypt',
         name: 'PayMob Egypt',
@@ -513,14 +567,72 @@ export class PaymentOrchestratorService {
         conditions: {
           currency: ['EGP'],
           country: ['EG'],
+          paymentMethod: ['card', 'wallet', 'bank_installments'],
+          amount: { max: 500000 }, // 5000 EGP maximum
         },
         gateway: PaymentGateway.PAYMOB,
         fallbackGateways: [PaymentGateway.STRIPE],
+        loadBalancing: {
+          enabled: true,
+          weight: 90,
+          alternatives: [
+            { gateway: PaymentGateway.STRIPE, weight: 10 }
+          ]
+        },
+        timeRestrictions: {
+          timezone: 'Africa/Cairo',
+          allowedHours: { start: 8, end: 22 }, // 8 AM to 10 PM local time
+        },
         isEnabled: true,
+        metadata: {
+          description: 'Egypt payment processing with local methods',
+          localMethods: ['wallet', 'bank_installments'],
+        },
+      },
+      // Enterprise tier routing
+      {
+        id: 'enterprise-tier',
+        name: 'Enterprise Tier Routing',
+        priority: 2,
+        conditions: {
+          tenantTier: ['Enterprise'],
+          currency: ['USD', 'EUR'],
+        },
+        gateway: PaymentGateway.STRIPE,
+        fallbackGateways: [PaymentGateway.PAYTABS],
+        loadBalancing: {
+          enabled: false,
+          weight: 100,
+        },
+        isEnabled: true,
+        metadata: {
+          description: 'Dedicated routing for enterprise customers',
+          features: ['priority_processing', 'dedicated_support'],
+        },
+      },
+      // VIP customer routing
+      {
+        id: 'vip-customers',
+        name: 'VIP Customer Routing',
+        priority: 2,
+        conditions: {
+          customerSegment: ['VIP'],
+        },
+        gateway: PaymentGateway.STRIPE,
+        fallbackGateways: [],
+        loadBalancing: {
+          enabled: false,
+          weight: 100,
+        },
+        isEnabled: true,
+        metadata: {
+          description: 'Premium routing for VIP customers',
+          features: ['priority_processing', 'no_fallback'],
+        },
       },
     ];
 
-    this.logger.log(`Loaded ${this.routingRules.length} default routing rules`);
+    this.logger.log(`Loaded ${this.routingRules.length} enhanced routing rules`);
   }
 
   // ==================== ENHANCED ORCHESTRATION METHODS ====================
