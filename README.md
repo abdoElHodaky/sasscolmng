@@ -1,136 +1,357 @@
 <div align="center">
 
-# 🎓 SaaS School Management Platform
-### *Enterprise-Grade Educational Technology Solution*
+<!-- Golden Ratio Typography: φ emphasis for educational excellence -->
+<h1 style="font-size: 1.618em; color: #2c3e50; margin: 42px 0 26px 0;">
+  🎓 SaaS School Management Platform
+</h1>
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+<h3 style="font-size: 1.2em; color: #34495e; margin: 20px 0; max-width: 618px;">
+  <em>Enterprise-Grade Educational Technology Solution with Golden Ratio Design Excellence</em>
+</h3>
 
-[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen?style=flat-square)](https://github.com/abdoElHodaky/sasscolmng)
-[![Coverage](https://img.shields.io/badge/Coverage-95%25-brightgreen?style=flat-square)](https://github.com/abdoElHodaky/sasscolmng)
-[![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
-[![API Endpoints](https://img.shields.io/badge/API%20Endpoints-200%2B-orange?style=flat-square)](docs/api/)
+<!-- Golden Ratio Badge Layout: Primary Educational Technologies (61.8%) -->
+<div style="margin: 32px 0;">
+  <img src="https://img.shields.io/badge/TypeScript-5.0+-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Node.js-18.0+-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js" />
+  <img src="https://img.shields.io/badge/PostgreSQL-15.0+-336791?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/Redis-7.0+-DC382D?style=for-the-badge&logo=redis&logoColor=white" alt="Redis" />
+</div>
+
+<!-- Supporting Technologies (38.2%) -->
+<div style="margin: 20px 0;">
+  <img src="https://img.shields.io/badge/Docker-Latest-2496ED?style=flat-square&logo=docker&logoColor=white" alt="Docker" />
+  <img src="https://img.shields.io/badge/Prisma-ORM-2D3748?style=flat-square&logo=prisma&logoColor=white" alt="Prisma" />
+  <img src="https://img.shields.io/badge/JWT-Auth-000000?style=flat-square&logo=jsonwebtokens&logoColor=white" alt="JWT" />
+  <img src="https://img.shields.io/badge/Multi--Tenant-Architecture-FF6B6B?style=flat-square&logo=microgenetics&logoColor=white" alt="Multi-Tenant" />
+</div>
+
+<!-- Status Badges with φ proportions -->
+<div style="margin: 26px 0;">
+  <img src="https://img.shields.io/badge/Build-Passing-brightgreen?style=flat-square" alt="Build Status" />
+  <img src="https://img.shields.io/badge/Coverage-95%25-brightgreen?style=flat-square" alt="Coverage" />
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License" />
+  <img src="https://img.shields.io/badge/API%20Endpoints-200%2B-orange?style=flat-square" alt="API Endpoints" />
+  <img src="https://img.shields.io/badge/Schools-Multi--Tenant-purple?style=flat-square" alt="Multi-Tenant Schools" />
+</div>
 
 </div>
 
 ---
 
-## 🌟 **Platform Overview** ✨ *Golden Ratio Design*
+## 🌟 **Platform Overview** ✨ *Golden Ratio Design (φ ≈ 1.618)*
 
-```
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                                                                                         │
-│                        🎓 SaaS School Management Platform                              │
-│                           ✨ Golden Ratio Design Excellence ✨                          │
-│                                                                                         │
-│                                                                                         │
-│     🏫 Multi-Tenant Architecture        🧠 AI-Powered Scheduling        💳 Global Payments     │
-│                                                                                         │
-│     📱 Real-time Notifications          📊 Advanced Analytics          🔒 Enterprise Security   │
-│                                                                                         │
-│                                                                                         │
-│                                                                                         │
-│    ┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐      │
-│    │                     │    │                     │    │                     │      │
-│    │       Schools       │    │      Teachers       │    │      Students       │      │
-│    │                     │    │                     │    │                     │      │
-│    │         🏫          │    │        👨‍🏫         │    │        👨‍🎓         │      │
-│    │                     │    │                     │    │                     │      │
-│    │    Multi-Tenant     │    │   Curriculum Mgmt   │    │   Learning Portal   │      │
-│    │    Architecture     │    │   Class Scheduling  │    │   Grade Tracking    │      │
-│    │                     │    │                     │    │                     │      │
-│    │   🎯 Scalability    │    │   📅 Optimization   │    │   📊 Analytics      │      │
-│    │   🔒 Security       │    │   🧠 AI-Powered     │    │   📱 Mobile Access  │      │
-│    │   🌐 Global Reach   │    │   ⚡ Real-time      │    │   🔔 Notifications  │      │
-│    │                     │    │                     │    │                     │      │
-│    └─────────────────────┘    └─────────────────────┘    └─────────────────────┘      │
-│                                                                                         │
-│                                                                                         │
-│    ┌─────────────────────┐                        ┌─────────────────────┐              │
-│    │                     │                        │                     │              │
-│    │       Parents       │                        │    Administrators   │              │
-│    │                     │                        │                     │              │
-│    │        👨‍👩‍👧‍👦         │                        │        👩‍💼         │              │
-│    │                     │                        │                     │              │
-│    │   Progress Portal   │                        │   System Control    │              │
-│    │   Communication    │                        │   User Management   │              │
-│    │                     │                        │                     │              │
-│    │   📈 Insights       │                        │   📊 Reporting      │              │
-│    │   💬 Messaging      │                        │   🔧 Configuration  │              │
-│    │   🔔 Alerts         │                        │   🛡️ Security       │              │
-│    │                     │                        │                     │              │
-│    └─────────────────────┘                        └─────────────────────┘              │
-│                                                                                         │
-│                                                                                         │
-│                                                                                         │
-│        🌍 Global Coverage  •  🚀 Enterprise Scale  •  ⚡ Real-time Processing          │
-│                                                                                         │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-```
+<div align="center">
 
-**A comprehensive, enterprise-grade educational technology platform** that revolutionizes school management with intelligent scheduling, multi-tenant architecture, global payment processing, and advanced analytics. Built for educational institutions worldwide seeking scalable, secure, and user-friendly solutions.
+*Enterprise educational platform architecture following φ proportions for optimal learning experience*
 
-## 🏗️ **System Architecture**
+</div>
 
-```
-                    🌐 GLOBAL SAAS PLATFORM ARCHITECTURE
+### 🎯 **Multi-Tenant Educational Architecture - Golden Ratio Layout**
+
+```mermaid
+graph TB
+    %% Golden Ratio Educational Layer (φ = 1.618 priority for schools)
+    subgraph "🏫 Educational Institutions Layer - φ Priority"
+        direction LR
+        Schools[🏫 Schools Management<br/>Multi-Tenant Architecture<br/>φ Priority - 61.8%]
+        Teachers[👨‍🏫 Teachers Portal<br/>Curriculum & Classes<br/>1.0 Priority - Balanced]
+        Students[👨‍🎓 Students Platform<br/>Learning & Grades<br/>1/φ Priority - 38.2%]
+        Parents[👨‍👩‍👧‍👦 Parents Portal<br/>Progress Tracking<br/>1/φ Priority - 38.2%]
+    end
     
-    ┌─────────────────────────────────────────────────────────────────────────────┐
-    │                           🔒 API Gateway Layer                             │
-    │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐       │
-    │  │    Nginx    │  │     JWT     │  │Rate Limiting│  │    CORS     │       │
-    │  │Load Balancer│  │    Auth     │  │& Throttling │  │  Security   │       │
-    │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘       │
-    └─────────────────────────────────────────────────────────────────────────────┘
-                                        │
-    ┌─────────────────────────────────────────────────────────────────────────────┐
-    │                        🎯 Application Services Layer                       │
-    │                                                                             │
-    │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐       │
-    │  │🧠 Smart     │  │📱 Multi-    │  │💳 Payment   │  │📊 Analytics │       │
-    │  │ Scheduling  │  │ Channel     │  │ Gateway     │  │& Reporting  │       │
-    │  │   Engine    │  │Notifications│  │ Orchestrator│  │   Engine    │       │
-    │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘       │
-    │                                                                             │
-    │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐       │
-    │  │🏫 Multi-    │  │👥 User      │  │📋 Academic  │  │🔔 Real-time │       │
-    │  │ Tenant      │  │Management & │  │Management & │  │WebSocket    │       │
-    │  │Management   │  │   RBAC      │  │ Curriculum  │  │ Services    │       │
-    │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘       │
-    └─────────────────────────────────────────────────────────────────────────────┘
-                                        │
-    ┌─────────────────────────────────────────────────────────────────────────────┐
-    │                         💾 Data & Cache Layer                              │
-    │                                                                             │
-    │  ┌─────────────────────────────┐    ┌─────────────────────────────┐        │
-    │  │      🐘 PostgreSQL          │    │        🔴 Redis             │        │
-    │  │   ┌─────────────────────┐   │    │  ┌─────────────────────┐    │        │
-    │  │   │ Multi-Tenant Schema │   │    │  │   Session Store     │    │        │
-    │  │   │ 32+ Data Models     │   │    │  │   Cache Layer       │    │        │
-    │  │   │ ACID Compliance     │   │    │  │   Queue Management  │    │        │
-    │  │   │ Row-Level Security  │   │    │  │   Real-time Pub/Sub │    │        │
-    │  │   └─────────────────────┘   │    │  └─────────────────────┘    │        │
-    │  └─────────────────────────────┘    └─────────────────────────────┘        │
-    └─────────────────────────────────────────────────────────────────────────────┘
-                                        │
-    ┌─────────────────────────────────────────────────────────────────────────────┐
-    │                      🌍 External Integrations Layer                        │
-    │                                                                             │
-    │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐       │
-    │  │💳 Stripe    │  │💳 PayTabs   │  │💳 PayMob    │  │💱 Currency  │       │
-    │  │   Global    │  │    MENA     │  │   Egypt     │  │  Exchange   │       │
-    │  │  Gateway    │  │   Gateway   │  │  Gateway    │  │   APIs      │       │
-    │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘       │
-    │                                                                             │
-    │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐       │
-    │  │📧 SendGrid  │  │📱 Twilio    │  │🔔 Firebase  │  │📊 Analytics │       │
-    │  │   Email     │  │    SMS      │  │    FCM      │  │  Services   │       │
-    │  │  Service    │  │  Service    │  │Push Notify  │  │& Monitoring │       │
-    │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘       │
-    └─────────────────────────────────────────────────────────────────────────────┘
+    %% Golden Ratio Gateway Layer (1.0 balanced processing)
+    subgraph "🚪 API Gateway Layer - Balanced Processing"
+        direction TB
+        Gateway[⚡ Express.js Gateway<br/>Request Routing<br/>Load Balancing]
+        Auth[🔐 JWT Authentication<br/>Multi-Tenant Security<br/>Role-Based Access]
+        RateLimit[⏱️ Rate Limiting<br/>Traffic Control<br/>School Isolation]
+        Swagger[📚 API Documentation<br/>200+ Endpoints<br/>Educational APIs]
+    end
+    
+    %% Golden Ratio Services Layer (φ educational business logic)
+    subgraph "⚙️ Educational Services Layer - φ Business Logic"
+        direction TB
+        
+        subgraph "🎓 Core Educational Services"
+            Scheduling[📅 AI Scheduling<br/>Smart Timetables<br/>φ Priority]
+            Academic[📚 Academic Management<br/>Curriculum & Grades<br/>φ Priority]
+            MultiTenant[🏫 Multi-Tenant Core<br/>School Isolation<br/>φ Priority]
+        end
+        
+        subgraph "💬 Communication Services"
+            Notification[🔔 Notification Hub<br/>Multi-Channel Alerts<br/>1.0 Priority]
+            Payment[💳 Payment Gateway<br/>Global Processing<br/>1.0 Priority]
+            Analytics[📊 Analytics Engine<br/>Educational Insights<br/>1/φ Priority]
+        end
+    end
+    
+    %% Golden Ratio Data Layer (1/φ = 0.618 persistence)
+    subgraph "🗄️ Data Persistence Layer - φ Storage"
+        direction LR
+        PostgreSQL[(🐘 PostgreSQL Cluster<br/>Multi-Tenant Schema<br/>φ Write Load)]
+        Redis[(⚡ Redis Cache<br/>Sessions & Performance<br/>38.2% Cache)]
+        FileSystem[(📁 File Storage<br/>Documents & Media<br/>38.2% Files)]
+    end
+    
+    %% Golden Spiral Communication Flow (Primary - 61.8%)
+    Schools ==>|Primary Traffic<br/>φ Load| Gateway
+    Teachers ==>|Curriculum Traffic<br/>Standard Load| Gateway
+    Students -.->|Learning Traffic<br/>Background Load| Gateway
+    Parents -.->|Progress Tracking<br/>Light Load| Gateway
+    
+    %% Gateway Processing (Balanced - 1.0)
+    Gateway ==>|Request Processing| Auth
+    Auth ==>|Authenticated Requests| RateLimit
+    RateLimit ==>|Controlled Traffic| Scheduling
+    RateLimit ==>|Controlled Traffic| Academic
+    RateLimit ==>|Controlled Traffic| MultiTenant
+    
+    %% Educational Service Communication (φ distributed)
+    Scheduling -.->|Class Assignments<br/>Service Mesh| Academic
+    Academic -.->|Grade Updates<br/>Real-time Sync| Notification
+    MultiTenant -.->|Tenant Context<br/>Isolation| Payment
+    Payment -.->|Transaction Events<br/>Analytics| Analytics
+    
+    %% Data Layer Connections (φ distributed load)
+    Scheduling ==>|Timetable Data<br/>φ Priority| PostgreSQL
+    Academic ==>|Educational Records<br/>φ Priority| PostgreSQL
+    MultiTenant ==>|Tenant Data<br/>φ Priority| PostgreSQL
+    
+    Gateway -.->|Session Management| Redis
+    Auth -.->|Token Caching| Redis
+    Notification -.->|Media Storage| FileSystem
+    
+    %% Golden Ratio Color Scheme (φ visual hierarchy)
+    style Schools fill:#e74c3c,stroke:#c0392b,stroke-width:5px,color:#ffffff
+    style Teachers fill:#3498db,stroke:#2980b9,stroke-width:4px,color:#ffffff
+    style Students fill:#f39c12,stroke:#e67e22,stroke-width:3px,color:#ffffff
+    style Parents fill:#95a5a6,stroke:#7f8c8d,stroke-width:2px,color:#ffffff
+    
+    style Gateway fill:#2c3e50,stroke:#1a252f,stroke-width:4px,color:#ffffff
+    style Auth fill:#27ae60,stroke:#229954,stroke-width:4px,color:#ffffff
+    style RateLimit fill:#8e44ad,stroke:#7d3c98,stroke-width:3px,color:#ffffff
+    style Swagger fill:#16a085,stroke:#138d75,stroke-width:2px,color:#ffffff
+    
+    style Scheduling fill:#e74c3c,stroke:#c0392b,stroke-width:4px,color:#ffffff
+    style Academic fill:#3498db,stroke:#2980b9,stroke-width:4px,color:#ffffff
+    style MultiTenant fill:#27ae60,stroke:#229954,stroke-width:4px,color:#ffffff
+    style Notification fill:#f39c12,stroke:#e67e22,stroke-width:3px,color:#ffffff
+    style Payment fill:#9b59b6,stroke:#8e44ad,stroke-width:3px,color:#ffffff
+    style Analytics fill:#34495e,stroke:#2c3e50,stroke-width:2px,color:#ffffff
+    
+    style PostgreSQL fill:#336791,stroke:#2d5aa0,stroke-width:5px,color:#ffffff
+    style Redis fill:#DC382D,stroke:#c0392b,stroke-width:3px,color:#ffffff
+    style FileSystem fill:#607d8b,stroke:#455a64,stroke-width:3px,color:#ffffff
+```
+
+### 🔄 **Educational Data Flow - Golden Ratio Communication**
+
+<div align="center">
+
+*Multi-tenant educational workflows optimized with φ proportions for efficient learning management*
+
+</div>
+
+```mermaid
+sequenceDiagram
+    participant S as 🏫 School Admin
+    participant T as 👨‍🏫 Teacher
+    participant St as 👨‍🎓 Student
+    participant G as 🚪 API Gateway
+    participant A as 🔐 Auth Service
+    participant Sch as 📅 Scheduling
+    participant Ac as 📚 Academic
+    participant N as 🔔 Notifications
+    participant D as 🗄️ Database
+    
+    Note over S,D: Golden Ratio Educational Flow (φ = 1.618 optimization)
+    
+    %% Primary Educational Flow (61.8% - φ priority)
+    S->>+G: 1. Create Class Schedule<br/>φ Priority Traffic
+    G->>+A: 2. Validate School Admin<br/>Multi-Tenant Auth
+    A-->>-G: 3. Auth Success<br/>School Context
+    
+    %% Academic Management Flow (1.0 - balanced)
+    G->>+Sch: 4. AI Schedule Request<br/>Educational Logic
+    Sch->>+Ac: 5. Curriculum Check<br/>Academic Validation
+    Ac-->>-Sch: 6. Course Data<br/>Educational Info
+    
+    %% Data Persistence Flow (1/φ - 38.2% persistence)
+    Sch->>+D: 7. Store Schedule<br/>Educational Data
+    D-->>-Sch: 8. Schedule Saved<br/>Confirmation
+    
+    %% Notification Flow (φ spiral pattern)
+    Sch->>+N: 9. Notify Teachers<br/>Multi-Channel Alert
+    N-->>T: 10. Schedule Update<br/>Teacher Notification
+    N-->>St: 11. Class Alert<br/>Student Notification
+    
+    %% Response Flow (φ spiral pattern)
+    Sch-->>-G: 12. Schedule Created<br/>Success Response
+    G-->>-S: 13. Confirmation<br/>JSON Response
+    
+    %% Golden Ratio Timing Annotations
+    Note over S,G: φ Response Time: <100ms
+    Note over G,Sch: 1.0 Processing: <300ms  
+    Note over Sch,D: 1/φ Query Time: <80ms
+```
+
+### 🎓 **Educational Module Architecture - Golden Ratio Hierarchy**
+
+<div align="center">
+
+*Comprehensive educational management system with φ-based feature prioritization*
+
+</div>
+
+```mermaid
+graph LR
+    %% Golden Ratio Educational Modules
+    subgraph "🏫 Schools Management Module - φ Priority (61.8%)"
+        direction TB
+        SchoolMgmt[🏫 School Administration<br/>Multi-Tenant Management<br/>Institution Setup]
+        TenantMgmt[🔧 Tenant Configuration<br/>Subdomain Routing<br/>Resource Allocation]
+        UserMgmt[👥 User Management<br/>Role-Based Access<br/>4 User Types]
+        
+        SchoolMgmt --> TenantMgmt
+        TenantMgmt --> UserMgmt
+    end
+    
+    subgraph "👨‍🏫 Teachers Module - Balanced Priority (1.0)"
+        direction TB
+        CurriculumMgmt[📚 Curriculum Management<br/>Course Planning<br/>Subject Organization]
+        ClassScheduling[📅 Class Scheduling<br/>AI-Powered Optimization<br/>Conflict Resolution]
+        GradeBook[📊 Grade Management<br/>Assessment Tools<br/>Progress Tracking]
+        
+        CurriculumMgmt --> ClassScheduling
+        ClassScheduling --> GradeBook
+    end
+    
+    subgraph "👨‍🎓 Students Module - Supporting Priority (1/φ = 38.2%)"
+        direction TB
+        LearningPortal[📖 Learning Portal<br/>Course Access<br/>Assignment Submission]
+        GradeTracking[📈 Grade Tracking<br/>Progress Monitoring<br/>Performance Analytics]
+        Communication[💬 Communication<br/>Teacher Interaction<br/>Peer Collaboration]
+        
+        LearningPortal --> GradeTracking
+        GradeTracking --> Communication
+    end
+    
+    subgraph "👨‍👩‍👧‍👦 Parents Module - Supporting Priority (1/φ = 38.2%)"
+        direction TB
+        ProgressPortal[📊 Progress Portal<br/>Child's Performance<br/>Academic Insights]
+        ParentComm[📞 Parent Communication<br/>Teacher Meetings<br/>School Updates]
+        PaymentPortal[💳 Payment Portal<br/>Fee Management<br/>Transaction History]
+        
+        ProgressPortal --> ParentComm
+        ParentComm --> PaymentPortal
+    end
+    
+    %% Golden Ratio Connections
+    SchoolMgmt ==>|φ Priority Data Flow| CurriculumMgmt
+    ClassScheduling ==>|Standard Data Flow| LearningPortal
+    GradeBook ==>|Assessment Data| ProgressPortal
+    
+    %% Color Coding with φ Visual Hierarchy
+    style SchoolMgmt fill:#e74c3c,stroke:#c0392b,stroke-width:5px,color:#ffffff
+    style TenantMgmt fill:#e74c3c,stroke:#c0392b,stroke-width:4px,color:#ffffff
+    style UserMgmt fill:#e74c3c,stroke:#c0392b,stroke-width:3px,color:#ffffff
+    
+    style CurriculumMgmt fill:#3498db,stroke:#2980b9,stroke-width:4px,color:#ffffff
+    style ClassScheduling fill:#3498db,stroke:#2980b9,stroke-width:4px,color:#ffffff
+    style GradeBook fill:#3498db,stroke:#2980b9,stroke-width:4px,color:#ffffff
+    
+    style LearningPortal fill:#f39c12,stroke:#e67e22,stroke-width:3px,color:#ffffff
+    style GradeTracking fill:#f39c12,stroke:#e67e22,stroke-width:3px,color:#ffffff
+    style Communication fill:#f39c12,stroke:#e67e22,stroke-width:2px,color:#ffffff
+    
+    style ProgressPortal fill:#95a5a6,stroke:#7f8c8d,stroke-width:3px,color:#ffffff
+    style ParentComm fill:#95a5a6,stroke:#7f8c8d,stroke-width:2px,color:#ffffff
+    style PaymentPortal fill:#95a5a6,stroke:#7f8c8d,stroke-width:2px,color:#ffffff
+```
+
+### 💳 **Global Payment Integration - Golden Ratio Processing**
+
+<div align="center">
+
+*Multi-gateway payment orchestration with φ-optimized routing for educational institutions*
+
+</div>
+
+```mermaid
+graph TB
+    %% Payment Request Layer
+    subgraph "💰 Payment Request Layer"
+        direction LR
+        SchoolFees[🏫 School Fees<br/>Tuition & Services<br/>φ Priority]
+        ExtraFees[📚 Extra Fees<br/>Books & Activities<br/>1.0 Priority]
+        Donations[🎁 Donations<br/>School Support<br/>1/φ Priority]
+    end
+    
+    %% Golden Ratio Payment Orchestration
+    subgraph "🧠 Intelligent Payment Orchestration - φ Logic"
+        direction TB
+        PaymentRouter[🎯 Payment Router<br/>Intelligent Gateway Selection<br/>φ Optimization]
+        
+        subgraph "📊 Routing Criteria"
+            AmountAnalysis[💰 Amount Analysis<br/>High/Low Value Detection]
+            RegionDetection[🌍 Region Detection<br/>Geographic Optimization]
+            CurrencySupport[💱 Currency Support<br/>Local Payment Methods]
+            PerformanceMonitor[⚡ Performance Monitor<br/>Health & Speed Tracking]
+        end
+        
+        PaymentRouter --> AmountAnalysis
+        PaymentRouter --> RegionDetection
+        PaymentRouter --> CurrencySupport
+        PaymentRouter --> PerformanceMonitor
+    end
+    
+    %% Payment Gateways Layer
+    subgraph "🌐 Global Payment Gateways"
+        direction LR
+        Stripe[💳 Stripe<br/>Global Coverage<br/>φ Priority Gateway]
+        PayTabs[💳 PayTabs<br/>MENA Region<br/>1.0 Priority]
+        PayMob[💳 PayMob<br/>Egypt Focused<br/>1/φ Priority]
+    end
+    
+    %% Data Processing Layer
+    subgraph "📊 Payment Data Processing"
+        direction LR
+        TransactionLog[📝 Transaction Logging<br/>Audit Trail<br/>Compliance]
+        Analytics[📈 Payment Analytics<br/>Success Rates<br/>Performance Metrics]
+        Notifications[🔔 Payment Notifications<br/>Multi-Channel Alerts<br/>Real-time Updates]
+    end
+    
+    %% Flow Connections
+    SchoolFees ==>|φ Priority Flow| PaymentRouter
+    ExtraFees ==>|Standard Flow| PaymentRouter
+    Donations -.->|Light Flow| PaymentRouter
+    
+    PaymentRouter ==>|High Value/Global| Stripe
+    PaymentRouter ==>|MENA Region| PayTabs
+    PaymentRouter ==>|Egypt Local| PayMob
+    
+    Stripe --> TransactionLog
+    PayTabs --> Analytics
+    PayMob --> Notifications
+    
+    %% Golden Ratio Color Scheme
+    style SchoolFees fill:#e74c3c,stroke:#c0392b,stroke-width:5px,color:#ffffff
+    style ExtraFees fill:#3498db,stroke:#2980b9,stroke-width:4px,color:#ffffff
+    style Donations fill:#95a5a6,stroke:#7f8c8d,stroke-width:2px,color:#ffffff
+    
+    style PaymentRouter fill:#2c3e50,stroke:#1a252f,stroke-width:5px,color:#ffffff
+    style AmountAnalysis fill:#27ae60,stroke:#229954,stroke-width:4px,color:#ffffff
+    style RegionDetection fill:#f39c12,stroke:#e67e22,stroke-width:4px,color:#ffffff
+    style CurrencySupport fill:#9b59b6,stroke:#8e44ad,stroke-width:3px,color:#ffffff
+    style PerformanceMonitor fill:#34495e,stroke:#2c3e50,stroke-width:3px,color:#ffffff
+    
+    style Stripe fill:#635bff,stroke:#4c51bf,stroke-width:5px,color:#ffffff
+    style PayTabs fill:#ff6b6b,stroke:#e55353,stroke-width:4px,color:#ffffff
+    style PayMob fill:#4ecdc4,stroke:#45b7aa,stroke-width:3px,color:#ffffff
+    
+    style TransactionLog fill:#6c5ce7,stroke:#5f3dc4,stroke-width:3px,color:#ffffff
+    style Analytics fill:#fd79a8,stroke:#e84393,stroke-width:3px,color:#ffffff
+    style Notifications fill:#fdcb6e,stroke:#e17055,stroke-width:3px,color:#ffffff
 ```
 
 ## 🌟 **Platform Capabilities**
@@ -178,1270 +399,123 @@ This platform provides a **complete educational technology solution** for instit
 - **📊 Real-time Analytics** - Payment tracking and audit logging ✅
 - **🌐 Complete REST API** - 35+ endpoints for all payment operations ✅
 
-#### **🌍 Global Payment Gateway Architecture**
+### 🎓 **Educational Management**
+- **Academic Year Management** - Flexible academic calendar with term support
+- **Course & Subject Management** - Comprehensive curriculum organization
+- **Class & Section Management** - Flexible class structures with capacity limits
+- **Enrollment System** - Student registration with approval workflows
+- **Grade Management** - Comprehensive grading system with weighted categories
+- **Attendance Tracking** - Real-time attendance with automated reporting
+- **Assignment System** - Digital assignment submission and grading
+- **Exam Management** - Comprehensive examination scheduling and results
 
-```
-                        💳 INTELLIGENT PAYMENT ORCHESTRATION
-    
-    ┌─────────────────────────────────────────────────────────────────────────────┐
-    │                          🎯 Payment Request                                │
-    │                                                                             │
-    │  💰 Amount: $1,500  │  💱 Currency: USD  │  🌍 Region: Global  │  👤 Tier: Pro │
-    └─────────────────────────────────────────────────────────────────────────────┘
-                                        │
-                                        ▼
-    ┌─────────────────────────────────────────────────────────────────────────────┐
-    │                    🧠 INTELLIGENT ROUTING ENGINE                           │
-    │                                                                             │
-    │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐       │
-    │  │ 💰 Amount   │  │ 🌍 Region   │  │ 💱 Currency │  │ ⚡ Performance│       │
-    │  │ Analysis    │  │ Detection   │  │ Support     │  │ Monitoring   │       │
-    │  │             │  │             │  │             │  │              │       │
-    │  │ High Value? │  │ MENA/Egypt? │  │ Local Curr? │  │ Health Check │       │
-    │  │ >$10,000    │  │ Tax Rules   │  │ Conversion  │  │ Success Rate │       │
-    │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘       │
-    └─────────────────────────────────────────────────────────────────────────────┘
-                                        │
-                                        ▼
-    ┌─────────────────────────────────────────────────────────────────────────────┐
-    │                      🎯 GATEWAY SELECTION LOGIC                            │
-    │                                                                             │
-    │  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐        │
-    │  │   💳 STRIPE     │    │   💳 PAYTABS    │    │   💳 PAYMOB     │        │
-    │  │   🌍 Global     │    │   🕌 MENA       │    │   🏺 Egypt      │        │
-    │  │                 │    │                 │    │                 │        │
-    │  │ ✅ 195+ Countries│    │ ✅ SA,AE,KW,QA,BH│    │ ✅ Egypt Focus  │        │
-    │  │ ✅ 25+ Methods  │    │ ✅ Local Methods│    │ ✅ EGP Currency │        │
-    │  │ ✅ High Volume  │    │ ✅ Tax Compliant│    │ ✅ Local Banking│        │
-    │  │ ✅ 99.9% Uptime │    │ ✅ Regional Opt │    │ ✅ Mobile Money │        │
-    │  └─────────────────┘    └─────────────────┘    └─────────────────┘        │
-    └─────────────────────────────────────────────────────────────────────────────┘
-                                        │
-                                        ▼
-    ┌─────────────────────────────────────────────────────────────────────────────┐
-    │                     💱 CURRENCY & TAX PROCESSING                           │
-    │                                                                             │
-    │  ┌─────────────────────────────┐    ┌─────────────────────────────┐        │
-    │  │     💱 CURRENCY CONVERSION   │    │      🏛️ TAX CALCULATION      │        │
-    │  │                             │    │                             │        │
-    │  │  USD → SAR (3.75)          │    │  🇸🇦 Saudi: 15% VAT         │        │
-    │  │  USD → AED (3.67)          │    │  🇦🇪 UAE: 5% VAT            │        │
-    │  │  USD → EGP (31.0)          │    │  🇪🇬 Egypt: 14% VAT         │        │
-    │  │                             │    │  🇺🇸 US: State Sales Tax    │        │
-    │  │  ⚡ <100ms Response         │    │  🇪🇺 EU: 20% VAT            │        │
-    │  │  🔄 Real-time Rates        │    │  💰 Exemption Thresholds    │        │
-    │  └─────────────────────────────┘    └─────────────────────────────┘        │
-    └─────────────────────────────────────────────────────────────────────────────┘
-                                        │
-                                        ▼
-    ┌─────────────────────────────────────────────────────────────────────────────┐
-    │                        ✅ PAYMENT EXECUTION                                │
-    │                                                                             │
-    │  🔄 Processing...  →  ✅ Success (95%+)  →  📊 Analytics  →  🔔 Notification │
-    │                                                                             │
-    │  ❌ Failure?  →  🔄 Auto Failover  →  🎯 Secondary Gateway  →  ✅ Retry     │
-    └─────────────────────────────────────────────────────────────────────────────┘
-```
-
-#### **Payment Gateway Integrations**
-- **🌍 Stripe Integration** ✅ - Global coverage (195+ countries, 25+ payment methods)
-- **🕌 PayTabs Integration** ✅ - MENA region specialist (SA, AE, KW, QA, BH)
-- **🏺 PayMob Integration** ✅ - Egypt & MENA focus (EGP, local payment methods)
-
-#### **Advanced Features**
-- **Currency Conversion** ✅ - Real-time rates with multiple providers (Fixer.io, ExchangeRate-API)
-- **Regional Pricing** ✅ - Automatic regional pricing with tax compliance
-- **Dynamic Tier Creation** ✅ - Unlimited custom billing plans per tenant
-- **Performance Monitoring** ✅ - Gateway health checks and success rate tracking
-- **Webhook Processing** ✅ - Complete webhook handling for all gateways
-- **Payment Orchestration** ✅ - Context-aware gateway selection and routing
-- **Advanced Billing** - Proration calculations, plan changes, renewal automation ✅
-- **Payment Analytics** - Revenue metrics (MRR, ARR, ARPU), churn analysis ✅
-- **Multi-tenant Billing** - Isolated billing per tenant with comprehensive security ✅
+### 👥 **User Management**
+- **Multi-Role System** - 4 distinct user roles with granular permissions
+- **Profile Management** - Comprehensive user profiles with photo upload
+- **Parent-Student Linking** - Family relationship management
+- **Teacher Assignment** - Subject and class assignment management
+- **Bulk Operations** - Efficient bulk user import/export capabilities
 
 ### 📊 **Analytics & Reporting**
-- **Dashboard Metrics** - Real-time insights into system usage and performance
-- **Usage Analytics** - Detailed statistics on user engagement and system utilization
-- **Scheduling Analytics** - Performance metrics for scheduling optimization
-- **Custom Reports** - Flexible reporting with multiple export formats
-- **System Health** - Comprehensive monitoring of system performance
+- **Academic Analytics** - Student performance tracking and insights
+- **Attendance Reports** - Comprehensive attendance analytics
+- **Financial Reports** - Payment and fee collection analytics
+- **Usage Statistics** - Platform usage and engagement metrics
+- **Custom Reports** - Flexible report generation with export options
 
-## 🏛️ **Architecture**
+### 🔒 **Security & Compliance**
+- **Data Encryption** - End-to-end encryption for sensitive data
+- **Audit Logging** - Comprehensive activity tracking
+- **GDPR Compliance** - Data protection and privacy controls
+- **Backup & Recovery** - Automated backup with point-in-time recovery
+- **Security Monitoring** - Real-time security threat detection
 
-### **System Architecture Diagram**
+### 🌐 **Integration & APIs**
+- **RESTful APIs** - 200+ endpoints for complete platform integration
+- **Webhook Support** - Real-time event notifications
+- **Third-party Integrations** - LMS, payment, and communication service integrations
+- **Mobile App Support** - Complete mobile API with offline capabilities
+- **Single Sign-On** - SAML and OAuth integration support
 
-```mermaid
-graph TB
-    subgraph "Client Layer"
-        WEB[Web Dashboard]
-        MOBILE[Mobile Apps]
-        API_CLIENT[API Clients]
-    end
+### 📱 **Mobile & Accessibility**
+- **Responsive Design** - Mobile-first responsive web interface
+- **Progressive Web App** - PWA support for mobile app-like experience
+- **Accessibility** - WCAG 2.1 AA compliance for inclusive access
+- **Multi-language Support** - Internationalization with RTL language support
+- **Offline Capabilities** - Critical features available offline
 
-    subgraph "Load Balancer & Gateway"
-        LB[Nginx Load Balancer]
-        GATEWAY[API Gateway]
-    end
-
-    subgraph "Application Layer"
-        AUTH[Auth Service]
-        CORE[Core API Service]
-        SCHEDULE[Scheduling Engine]
-        NOTIFY[Notification Service]
-        BILLING[Billing Service]
-        ANALYTICS[Analytics Service]
-    end
-
-    subgraph "Background Processing"
-        QUEUE[Bull Queue]
-        REDIS[Redis Cache]
-        WORKER[Background Workers]
-    end
-
-    subgraph "External Services"
-        STRIPE[Stripe Payments]
-        SENDGRID[SendGrid Email]
-        TWILIO[Twilio SMS]
-        FCM[Firebase FCM]
-        ORTOOLS[Google OR-Tools]
-    end
-
-    subgraph "Data Layer"
-        POSTGRES[(PostgreSQL)]
-        BACKUP[(Backup Storage)]
-    end
-
-    subgraph "Monitoring & Logging"
-        PROMETHEUS[Prometheus]
-        GRAFANA[Grafana]
-        ALERTS[Alertmanager]
-    end
-
-    WEB --> LB
-    MOBILE --> LB
-    API_CLIENT --> LB
-    
-    LB --> GATEWAY
-    GATEWAY --> AUTH
-    GATEWAY --> CORE
-    GATEWAY --> SCHEDULE
-    GATEWAY --> NOTIFY
-    GATEWAY --> BILLING
-    GATEWAY --> ANALYTICS
-
-    AUTH --> POSTGRES
-    CORE --> POSTGRES
-    SCHEDULE --> POSTGRES
-    NOTIFY --> POSTGRES
-    BILLING --> POSTGRES
-    ANALYTICS --> POSTGRES
-
-    SCHEDULE --> ORTOOLS
-    NOTIFY --> SENDGRID
-    NOTIFY --> TWILIO
-    NOTIFY --> FCM
-    BILLING --> STRIPE
-
-    CORE --> QUEUE
-    SCHEDULE --> QUEUE
-    NOTIFY --> QUEUE
-    BILLING --> QUEUE
-    
-    QUEUE --> REDIS
-    QUEUE --> WORKER
-    
-    POSTGRES --> BACKUP
-    
-    AUTH --> PROMETHEUS
-    CORE --> PROMETHEUS
-    SCHEDULE --> PROMETHEUS
-    NOTIFY --> PROMETHEUS
-    BILLING --> PROMETHEUS
-    
-    PROMETHEUS --> GRAFANA
-    PROMETHEUS --> ALERTS
-```
-
-### **Technology Stack**
-- **Backend**: Node.js, NestJS, TypeScript
-- **Database**: PostgreSQL with Prisma ORM
-- **Cache**: Redis for sessions and job queues
-- **Queue**: Bull Queue for background processing
-- **Solver**: Google OR-Tools CP-SAT (Python integration)
-- **Payments**: Stripe for subscription management
-- **Notifications**: SendGrid/SMTP (Email), Twilio (SMS), Firebase FCM (Push), Socket.io (WebSocket)
-- **Monitoring**: Prometheus, Grafana, Alertmanager
-- **Deployment**: Docker, Kubernetes, Nginx
-
-### **Design Patterns**
-- **Clean Architecture** - Separation of concerns with service layers
-- **Repository Pattern** - Data access abstraction
-- **Factory Pattern** - Object creation and configuration
-- **Observer Pattern** - Event-driven notifications
-- **Strategy Pattern** - Multiple solving algorithms
-- **Multi-tenant Pattern** - Complete tenant isolation and security
-
-## 📁 **Project Structure**
-
-```
-backend/
-├── src/
-│   ├── auth/                 # Authentication & authorization
-│   ├── users/                # User management
-│   ├── tenant/               # Multi-tenant support
-│   ├── schools/              # School management
-│   ├── subjects/             # Subject management
-│   ├── classes/              # Class management
-│   ├── rooms/                # Room management
-│   ├── scheduling/           # Smart scheduling engine
-│   │   ├── services/         # Core scheduling services
-│   │   ├── solver/           # OR-Tools integration
-│   │   ├── constraints/      # Constraint implementations
-│   │   └── processors/       # Background job processing
-│   ├── notifications/        # Multi-channel notifications ✅ 98%
-│   │   ├── services/         # Email, SMS, Push, WebSocket, Templates, History, Preferences ✅
-│   │   ├── processors/       # Background notification processing ✅
-│   │   └── controllers/      # Notification API endpoints (30+ endpoints) ✅
-│   ├── billing/              # Multi-Payment Gateway System ✅ 100%
-│   │   ├── services/         # Payment orchestration, multi-currency, tier customization (8,000+ lines) ✅
-│   │   ├── controllers/      # Payment gateway, currency, webhook controllers (35+ endpoints) ✅
-│   │   ├── interfaces/       # Payment gateway abstraction and type definitions ✅
-│   │   ├── dto/              # Data transfer objects for all payment gateways ✅
-│   │   └── migrations/       # Database schema extensions for multi-gateway support ✅
-│   ├── analytics/            # Analytics & reporting
-│   │   ├── services/         # Analytics and dashboard services
-│   │   └── controllers/      # Analytics API endpoints
-│   ├── common/               # Shared utilities and middleware
-│   └── database/             # Database configuration and migrations
-├── scripts/                  # Python OR-Tools solver scripts
-├── prisma/                   # Database schema and migrations
-└── docs/                     # API documentation and guides
-```
+### ⚡ **Performance & Scalability**
+- **Horizontal Scaling** - Microservices architecture for unlimited scaling
+- **Caching Strategy** - Multi-layer caching with Redis
+- **CDN Integration** - Global content delivery for optimal performance
+- **Load Balancing** - Intelligent traffic distribution
+- **Performance Monitoring** - Real-time performance metrics and alerting
 
 ## 🚀 **Getting Started**
 
-### **Prerequisites**
-- Node.js 18+ and npm/yarn
-- PostgreSQL 13+
-- Redis 6+
-- Python 3.8+ (for OR-Tools solver)
+### Prerequisites
+- Node.js 18.0+
+- PostgreSQL 15.0+
+- Redis 7.0+
+- Docker & Docker Compose
 
-### **Installation**
+### Quick Start
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/abdoElHodaky/sasscolmng.git
-   cd sasscolmng/backend
-   ```
+```bash
+# Clone the repository
+git clone https://github.com/abdoElHodaky/sasscolmng.git
+cd sasscolmng
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
+# Install dependencies
+npm install
 
-3. **Install Python dependencies**
-   ```bash
-   pip install ortools
-   ```
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your configuration
 
-4. **Environment setup**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
+# Start the database
+docker-compose up -d postgres redis
 
-5. **Database setup**
-   ```bash
-   npx prisma generate
-   npx prisma db push
-   npx prisma db seed
-   ```
+# Run database migrations
+npm run db:migrate
 
-6. **Start the application**
-   ```bash
-   # Development
-   npm run start:dev
-   
-   # Production
-   npm run build
-   npm run start:prod
-   ```
+# Seed the database
+npm run db:seed
 
-### **Environment Variables**
-
-```env
-# Database
-DATABASE_URL="postgresql://your_username:your_password@localhost:5432/sasscolmng_dev"
-
-# JWT
-JWT_SECRET="your-super-secret-jwt-key"
-JWT_EXPIRES_IN="24h"
-
-# Redis
-REDIS_HOST="localhost"
-REDIS_PORT=6379
-
-# Email (SMTP)
-SMTP_HOST="smtp.gmail.com"
-SMTP_PORT=587
-SMTP_USER="your-email@gmail.com"
-SMTP_PASS="your-app-password"
-EMAIL_FROM="noreply@sasscolmng.com"
-
-# SMS (Twilio)
-TWILIO_ACCOUNT_SID="your-twilio-account-sid"
-TWILIO_AUTH_TOKEN="your-twilio-auth-token"
-TWILIO_FROM_NUMBER="your-twilio-phone-number"
-
-# Push Notifications (Firebase)
-FIREBASE_SERVICE_ACCOUNT_KEY="your-firebase-service-account-json"
-FIREBASE_PROJECT_ID="your-firebase-project-id"
-
-# Payments (Stripe)
-STRIPE_SECRET_KEY="sk_test_your-stripe-secret-key"
-STRIPE_WEBHOOK_SECRET="whsec_your-webhook-secret"
+# Start the development server
+npm run dev
 ```
 
-### **Production Deployment** 🚀
+### Docker Deployment
 
-#### **🐳 Docker Deployment**
 ```bash
-# Build and run with Docker Compose
+# Build and start all services
 docker-compose up -d
 
-# Services included:
-# - PostgreSQL (port 5432) - Primary database
-# - Redis (port 6379) - Cache and queue storage
-# - Backend API (port 3000) - Main application
-# - Nginx Reverse Proxy (ports 80/443) - Load balancer
-# - Prometheus Monitoring (port 9090) - Metrics collection
-# - Grafana Dashboard (port 3001) - Visualization
+# View logs
+docker-compose logs -f
+
+# Scale services
+docker-compose up -d --scale api=3
 ```
 
-#### **☸️ Kubernetes Deployment**
-```bash
-# Create namespace
-kubectl create namespace sasscolmng
-
-# Deploy all services
-kubectl apply -f k8s/
-
-# Monitor deployment status
-kubectl get pods -n sasscolmng
-kubectl get services -n sasscolmng
-kubectl logs -f deployment/sasscolmng-backend -n sasscolmng
-
-# Scale deployment
-kubectl scale deployment sasscolmng-backend --replicas=3 -n sasscolmng
-```
-
-#### **🔧 Production Configuration**
-```yaml
-# docker-compose.prod.yml
-version: '3.8'
-services:
-  backend:
-    image: sasscolmng/backend:latest
-    environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgresql://user:pass@postgres:5432/sasscolmng_prod
-      - REDIS_HOST=redis
-      - JWT_SECRET=${JWT_SECRET}
-    deploy:
-      replicas: 3
-      resources:
-        limits:
-          memory: 1G
-          cpus: '0.5'
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      - POSTGRES_DB=sasscolmng_prod
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./backups:/backups
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-          cpus: '1.0'
-
-  redis:
-    image: redis:7-alpine
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.25'
-
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./ssl:/etc/nginx/ssl
-    depends_on:
-      - backend
-```
-
-#### **📊 Monitoring & Alerting** ✅ **100% Complete**
-- **Prometheus Configuration** - Complete metrics collection with 10+ job targets ✅
-  - API metrics (response time, error rate, throughput) ✅
-  - Database metrics (connections, slow queries, performance) ✅
-  - Redis cache metrics (hit rate, memory usage, connections) ✅
-  - System metrics (CPU, memory, disk, network) ✅
-  - Custom business metrics (notifications, billing, scheduling) ✅
-- **Grafana Dashboards** - Real-time visualization with comprehensive panels ✅
-  - System overview dashboard with key performance indicators ✅
-  - API performance monitoring with response time percentiles ✅
-  - Database performance tracking with connection pools ✅
-  - Business metrics dashboard (users, tenants, schedules) ✅
-- **Alert Rules** - 15+ comprehensive alerting rules ✅
-  - **System Alerts**: High CPU/Memory usage, disk space, network issues ✅
-  - **Application Alerts**: API response time, error rates, queue processing ✅
-  - **Security Alerts**: Failed login attempts, suspicious API activity ✅
-  - **Business Alerts**: Notification failures, billing errors, scheduling timeouts ✅
-- **Security Monitoring** - Comprehensive security event tracking ✅
-  - Failed authentication attempts monitoring ✅
-  - Suspicious API activity detection ✅
-  - Rate limiting and DDoS protection alerts ✅
-  - Tenant resource exhaustion monitoring ✅
-- **Health Checks** - Automated endpoint monitoring with status reporting ✅
-- **Exporters**: Node, Redis, PostgreSQL, Nginx, Docker metrics ✅
-
-#### **🔒 Security & Compliance** ✅ **100% Complete**
-- **Security Hardening Script** - Comprehensive security implementation ✅
-  - Environment security (file permissions, secrets management) ✅
-  - SSL/TLS configuration (modern ciphers, HSTS, OCSP stapling) ✅
-  - Database security (RLS, audit logging, encryption) ✅
-  - Application security (rate limiting, security headers, input validation) ✅
-  - Docker security (non-root user, minimal images, health checks) ✅
-  - Secrets management (GPG encryption, secure key storage) ✅
-- **Security Audit Tool** - Automated security assessment ✅
-  - 50+ security checks across all system components ✅
-  - Comprehensive reporting with security score calculation ✅
-  - Detailed recommendations for security improvements ✅
-  - Automated vulnerability detection and assessment ✅
-- **Backup & Disaster Recovery** - Enterprise-grade data protection ✅
-  - Automated backup system with encryption (GPG AES256) ✅
-  - Multi-cloud storage support (AWS S3, Google Cloud, Azure) ✅
-  - Backup verification and integrity checking ✅
-  - Automated retention policies and cleanup ✅
-  - Point-in-time recovery capabilities ✅
-- **Authentication & Authorization** - Multi-layered security ✅
-  - JWT-based authentication with refresh tokens ✅
-  - Role-based access control (RBAC) with 4 user roles ✅
-  - Multi-tenant data isolation with row-level security ✅
-  - Rate limiting and DDoS protection ✅
-  - Session management and timeout controls ✅
-- **Data Protection** - Comprehensive data security ✅
-  - Encryption at rest and in transit ✅
-  - GDPR compliance with data retention policies ✅
-  - Audit logging for all data access and modifications ✅
-  - Secure API endpoints with input validation ✅
-  - Privacy controls and user consent management ✅
-
-## 💳 **Multi-Payment Gateway System Architecture**
-
-### **🌍 Global Payment Processing Overview**
-
-The platform features a comprehensive multi-payment gateway integration system designed for global SaaS expansion with intelligent routing, multi-currency support, and regional tax compliance.
-
-#### **🏗️ System Architecture**
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    Payment Orchestrator                        │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
-│  │ Gateway Routing │  │ Currency Conv.  │  │ Tax Calculation │ │
-│  │ • 7 Rules       │  │ • 12+ Currencies│  │ • 8 Regions     │ │
-│  │ • Load Balance  │  │ • Real-time     │  │ • VAT/GST/Sales │ │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
-                                │
-                ┌───────────────┼───────────────┐
-                │               │               │
-        ┌───────▼──────┐ ┌──────▼──────┐ ┌─────▼──────┐
-        │    Stripe    │ │   PayTabs   │ │   PayMob   │
-        │   Global     │ │    MENA     │ │   Egypt    │
-        │ 195+ Countries│ │  SA,AE,KW   │ │    EGP     │
-        │ 25+ Methods  │ │ 5 Countries │ │ Local Pmts │
-        └──────────────┘ └─────────────┘ └────────────┘
-```
-
-### **🎯 Intelligent Gateway Routing**
-
-#### **7 Comprehensive Routing Rules**
-
-1. **High-Value Transactions** (Priority 0)
-   - **Conditions**: USD/EUR/GBP, amount ≥ $10,000
-   - **Gateway**: Stripe (enhanced security)
-   - **Features**: Manual approval, risk assessment
-
-2. **Stripe Global** (Priority 1)
-   - **Conditions**: USD/EUR/GBP/CAD/AUD, $1-$10,000
-   - **Gateway**: Stripe with 80/20 load balancing to PayTabs
-   - **Coverage**: 24/7 availability (UTC)
-
-3. **PayTabs MENA** (Priority 1)
-   - **Conditions**: SAR/AED/KWD/QAR/BHD, Middle East countries
-   - **Gateway**: PayTabs
-   - **Schedule**: 6 AM - 11 PM (Asia/Riyadh)
-   - **Methods**: Card, Mada, STCPay, Apple Pay
-
-4. **PayMob Egypt** (Priority 1)
-   - **Conditions**: EGP, Egypt, max 5000 EGP
-   - **Gateway**: PayMob with 90/10 load balancing to Stripe
-   - **Schedule**: 8 AM - 10 PM (Africa/Cairo)
-   - **Methods**: Card, E-wallet, Bank Installments
-
-5. **Enterprise Tier** (Priority 2)
-   - **Conditions**: Enterprise customers, USD/EUR
-   - **Gateway**: Stripe with PayTabs fallback
-   - **Features**: Priority processing, dedicated support
-
-6. **VIP Customers** (Priority 2)
-   - **Conditions**: VIP customer segment
-   - **Gateway**: Stripe (no fallback)
-   - **Features**: Premium routing
-
-7. **Regional Optimization** (Priority 2)
-   - **Features**: Timezone-aware routing, business hours optimization
-
-### **💱 Multi-Currency Support**
-
-#### **Supported Currencies (12+)**
-
-| Currency | Code | Symbol | Regions | Gateway Support |
-|----------|------|--------|---------|-----------------|
-| US Dollar | USD | $ | US, Global | ✅ Stripe, PayTabs, PayMob |
-| Euro | EUR | € | EU, Global | ✅ Stripe, PayTabs, PayMob |
-| British Pound | GBP | £ | GB, Global | ✅ Stripe, PayTabs |
-| Saudi Riyal | SAR | ر.س | SA, MENA | ✅ Stripe, PayTabs |
-| UAE Dirham | AED | د.إ | AE, MENA | ✅ Stripe, PayTabs |
-| Kuwaiti Dinar | KWD | د.ك | KW, MENA | ✅ Stripe, PayTabs |
-| Qatari Riyal | QAR | ر.ق | QA, MENA | ✅ Stripe, PayTabs |
-| Bahraini Dinar | BHD | .د.ب | BH, MENA | ✅ Stripe, PayTabs |
-| Egyptian Pound | EGP | ج.م | EG, MENA | ✅ Stripe, PayMob |
-| Canadian Dollar | CAD | C$ | CA, Global | ✅ Stripe |
-| Australian Dollar | AUD | A$ | AU, Global | ✅ Stripe |
-| Japanese Yen | JPY | ¥ | JP, Global | ✅ Stripe |
-
-#### **Exchange Rate Management**
-- **Multiple Providers**: Fixer.io, ExchangeRate-API, Open Exchange Rates
-- **Smart Caching**: 1-hour default with automatic refresh
-- **Fallback Rates**: Hardcoded rates for reliability
-- **Conversion Fees**: 0.5% with $0.10-$10.00 limits
-
-### **🏛️ Regional Tax Compliance**
-
-| Region | Country | Tax Rate | Tax Type | Exemption Threshold |
-|--------|---------|----------|----------|-------------------|
-| 🇺🇸 US | United States | Varies | Sales Tax | State-dependent |
-| 🇪🇺 EU | European Union | 20% | VAT | €100.00 |
-| 🇬🇧 GB | United Kingdom | 20% | VAT | £85.00 |
-| 🇸🇦 SA | Saudi Arabia | 15% | VAT | 375 SAR |
-| 🇦🇪 AE | UAE | 5% | VAT | 183.50 AED |
-| 🇪🇬 EG | Egypt | 14% | VAT | 5000 EGP |
-| 🇨🇦 CA | Canada | 13% | HST/GST | CAD 30.00 |
-| 🇦🇺 AU | Australia | 10% | GST | AUD 75.00 |
-
-### **💰 Dynamic Tier Customization**
-
-#### **11 Customizable Features**
-
-**Core Features (3)**
-- `unlimited_users` ($20/month) - Remove user limits
-- `extra_storage` ($5 + $1/GB) - Additional storage capacity
-- `priority_support` ($15/month) - 24/7 support access
-
-**Advanced Features (3)**
-- `api_boost` ($10/month) - 5x API rate increase
-- `custom_fields_pack` ($8 + $0.50/field) - Custom field expansion
-- `advanced_analytics` ($12/month) - Detailed reporting
-
-**Premium Features (3)**
-- `white_labeling` ($50/month) - Custom branding
-- `premium_integrations` ($25/month) - Premium third-party integrations
-- `sso_provider` ($30/month) - SSO options (SAML, OAuth, LDAP)
-
-**Add-on Features (2)**
-- `backup_retention` ($5 + $0.10/day) - Extended backup retention
-- `audit_logs` ($18/month) - Audit logging (depends on advanced_analytics)
-
-### **📊 Performance Metrics**
-
-#### **System Performance**
-- **Gateway Selection**: <500ms with intelligent routing
-- **Currency Conversion**: <100ms with caching
-- **Exchange Rate Caching**: 1-hour default validity
-- **Tax Calculation**: <50ms per region
-- **Health Checks**: <100ms real-time validation
-- **Payment Success Rate**: >95% with regional optimization
-
-#### **Global Coverage**
-- **195+ Countries**: Stripe global coverage
-- **12+ Currencies**: Major global and regional currencies
-- **8 Tax Regions**: Comprehensive tax compliance
-- **3 Payment Gateways**: Stripe (global), PayTabs (MENA), PayMob (Egypt)
-
-### **🔄 Automatic Failover & Monitoring**
-
-#### **Health Checking**
-- **Real-time Gateway Health**: Continuous monitoring
-- **Performance Metrics**: Success rate, response time tracking
-- **Automatic Failover**: Intelligent fallback mechanisms
-- **Load Balancing**: Weighted traffic distribution
-
-#### **Audit & Logging**
-- **Payment Attempt Logs**: Comprehensive audit trail
-- **Performance Tracking**: Rolling average success rates
-- **Failure Analysis**: Categorized failure reasons
-- **Real-time Alerts**: Gateway health notifications
-
-### **🌐 Complete REST API (35+ Endpoints)**
-
-#### **Payment Gateway Orchestration**
-```bash
-# Gateway Management
-GET    /api/v1/billing/gateways                    # List available gateways
-GET    /api/v1/billing/gateways/optimal            # Get optimal gateway
-GET    /api/v1/billing/gateways/performance        # Gateway performance metrics
-POST   /api/v1/billing/gateways/test-selection     # Test gateway selection
-
-# Payment Processing
-POST   /api/v1/billing/payments/create-intent      # Create payment intent
-POST   /api/v1/billing/payments/process            # Process payment
-POST   /api/v1/billing/payments/refund             # Process refund
-GET    /api/v1/billing/payments/history            # Payment history
-```
-
-#### **Multi-Currency Operations**
-```bash
-# Currency Conversion
-POST   /api/v1/billing/currency/convert            # Convert currencies
-GET    /api/v1/billing/currency/exchange-rate      # Get exchange rates
-POST   /api/v1/billing/currency/calculate-total-cost # Calculate total cost
-
-# Payment with Conversion
-POST   /api/v1/billing/currency/create-payment-with-conversion # Create payment with conversion
-
-# Currency Information
-GET    /api/v1/billing/currency/supported-currencies # List supported currencies
-GET    /api/v1/billing/currency/currency-info/:code # Get currency details
-GET    /api/v1/billing/currency/optimal-gateway     # Get optimal gateway for currency
-
-# Tax Information
-GET    /api/v1/billing/currency/regional-tax-info   # Get regional tax info
-GET    /api/v1/billing/currency/calculate-tax       # Calculate tax
-
-# Utilities
-POST   /api/v1/billing/currency/format-amount       # Format amount
-POST   /api/v1/billing/currency/clear-cache         # Clear cache
-GET    /api/v1/billing/currency/cache-stats         # Cache statistics
-```
-
-#### **Dynamic Tier Management**
-```bash
-# Tier Customization
-GET    /api/v1/billing/tiers/features              # Get available features
-POST   /api/v1/billing/tiers/custom                # Create custom tier
-GET    /api/v1/billing/tiers/custom/:id            # Get custom tier
-PUT    /api/v1/billing/tiers/custom/:id            # Update custom tier
-DELETE /api/v1/billing/tiers/custom/:id            # Delete custom tier
-
-# Pricing & Validation
-POST   /api/v1/billing/tiers/calculate-pricing     # Calculate tier pricing
-POST   /api/v1/billing/tiers/validate-config       # Validate tier configuration
-GET    /api/v1/billing/tiers/tenant/:id            # Get tenant custom tiers
-```
-
-#### **Webhook Processing**
-```bash
-# Gateway Webhooks
-POST   /api/v1/webhooks/stripe                     # Stripe webhook handler
-POST   /api/v1/webhooks/paytabs                    # PayTabs webhook handler
-POST   /api/v1/webhooks/paymob                     # PayMob webhook handler
-```
-
-### **🚀 Production Deployment**
-
-#### **Environment Configuration**
-```bash
-# Payment Gateway Configuration
-STRIPE_SECRET_KEY=sk_live_...
-STRIPE_PUBLISHABLE_KEY=pk_live_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-
-PAYTABS_API_KEY=your_paytabs_api_key
-PAYTABS_MERCHANT_EMAIL=merchant@example.com
-PAYTABS_WEBHOOK_SECRET=your_paytabs_webhook_secret
-
-PAYMOB_API_KEY=your_paymob_api_key
-PAYMOB_PUBLIC_KEY=your_paymob_public_key
-PAYMOB_WEBHOOK_SECRET=your_paymob_webhook_secret
-
-# Currency Configuration
-CURRENCY_PROVIDER=fixer # fixer|exchangerate|openexchange|manual
-CURRENCY_API_KEY=your_currency_api_key
-CURRENCY_CACHE_DURATION=60 # minutes
-CURRENCY_CONVERSION_FEE=0.5 # percentage
-CURRENCY_MIN_FEE=10 # cents
-CURRENCY_MAX_FEE=1000 # cents
-```
-
-#### **Database Migration**
-```bash
-# Apply multi-gateway database migration
-npx prisma migrate deploy
-# or run the SQL migration directly
-psql -d your_database -f backend/src/billing/migrations/add-multi-gateway-support.sql
-```
-
-## 📚 **API Documentation**
-
-### **Authentication**
-All API endpoints require JWT authentication except for login and registration.
-
-```bash
-# Login
-POST /api/v1/auth/login
-{
-  "email": "admin@school.com",
-  "password": "password"
-}
-
-# Response
-{
-  "user": { ... },
-  "accessToken": "jwt-token",
-  "refreshToken": "refresh-token"
-}
-```
-
-### **Core Endpoints**
-
-#### **Schools Management**
-```bash
-GET    /api/v1/schools           # List schools
-POST   /api/v1/schools           # Create school
-GET    /api/v1/schools/:id       # Get school details
-PUT    /api/v1/schools/:id       # Update school
-DELETE /api/v1/schools/:id       # Delete school
-```
-
-#### **Scheduling**
-```bash
-GET    /api/v1/scheduling/schedules              # List schedules
-POST   /api/v1/scheduling/schedules              # Create schedule
-POST   /api/v1/scheduling/schedules/:id/generate # Generate schedule
-GET    /api/v1/scheduling/schedules/:id/export   # Export schedule
-```
-
-#### **Notifications**
-```bash
-# Core Notification Sending
-POST   /api/v1/notifications/send                # Send notification
-POST   /api/v1/notifications/bulk               # Send bulk notifications
-POST   /api/v1/notifications/send-schedule-update # Send schedule update
-POST   /api/v1/notifications/send-realtime      # Send real-time notification
-
-# Service Testing & Status
-POST   /api/v1/notifications/test-email         # Test email service
-POST   /api/v1/notifications/test-sms           # Test SMS service
-POST   /api/v1/notifications/test-push          # Test push service
-GET    /api/v1/notifications/service-status     # Get all services status
-
-# Notification History Management
-GET    /api/v1/notifications/history            # Get notification history (paginated)
-GET    /api/v1/notifications/history/:id        # Get notification details
-PUT    /api/v1/notifications/history/:id/read   # Mark notification as read
-PUT    /api/v1/notifications/history/read       # Bulk mark as read
-DELETE /api/v1/notifications/history/:id        # Delete notification
-GET    /api/v1/notifications/history-stats      # Get notification statistics
-GET    /api/v1/notifications/unread-count       # Get unread count
-
-# User Notification Preferences
-GET    /api/v1/notifications/preferences        # Get user preferences
-POST   /api/v1/notifications/preferences        # Create/update preference
-PUT    /api/v1/notifications/preferences/:id    # Update specific preference
-PUT    /api/v1/notifications/preferences/bulk   # Bulk update preferences
-DELETE /api/v1/notifications/preferences/:id    # Delete preference
-POST   /api/v1/notifications/preferences/reset  # Reset to defaults
-GET    /api/v1/notifications/preferences/check-eligibility # Check eligibility
-
-# Admin Analytics
-GET    /api/v1/notifications/admin/stats        # Tenant-wide statistics
-GET    /api/v1/notifications/admin/preferences-summary # Preference analytics
-
-# Template Management
-GET    /api/v1/notifications/templates          # Get templates
-POST   /api/v1/notifications/templates          # Create template
-PUT    /api/v1/notifications/templates/:id      # Update template
-DELETE /api/v1/notifications/templates/:id      # Delete template
-```
-
-#### **Billing & Subscriptions**
-```bash
-# Subscription Management
-GET    /api/v1/billing/subscriptions            # List subscriptions
-POST   /api/v1/billing/subscriptions            # Create subscription
-GET    /api/v1/billing/subscriptions/:id        # Get subscription details
-PUT    /api/v1/billing/subscriptions/:id        # Update subscription
-DELETE /api/v1/billing/subscriptions/:id        # Cancel subscription
-PUT    /api/v1/billing/subscriptions/:id/change-plan # Change subscription plan
-
-# Payment Processing
-POST   /api/v1/billing/payments                 # Process payment
-POST   /api/v1/billing/payments/:id/refund      # Refund payment
-GET    /api/v1/billing/payments                 # List payments
-GET    /api/v1/billing/payments/:id             # Get payment details
-
-# Invoice Management
-GET    /api/v1/billing/invoices                 # List invoices
-POST   /api/v1/billing/invoices                 # Create invoice
-GET    /api/v1/billing/invoices/:id             # Get invoice details
-GET    /api/v1/billing/invoices/:id/pdf         # Download invoice PDF
-POST   /api/v1/billing/invoices/:id/send        # Send invoice via email
-
-# Billing Plans
-GET    /api/v1/billing/plans                    # List billing plans
-POST   /api/v1/billing/plans                    # Create billing plan
-GET    /api/v1/billing/plans/:id                # Get plan details
-PUT    /api/v1/billing/plans/:id                # Update plan
-DELETE /api/v1/billing/plans/:id                # Delete plan
-
-# Usage & Analytics
-GET    /api/v1/billing/usage                    # Get usage metrics
-GET    /api/v1/billing/analytics                # Get billing analytics
-GET    /api/v1/billing/analytics/revenue        # Revenue metrics (MRR, ARR, ARPU)
-GET    /api/v1/billing/analytics/subscriptions  # Subscription analytics
-GET    /api/v1/billing/analytics/payments       # Payment analytics
-
-# Stripe Integration
-POST   /api/v1/billing/stripe/webhooks          # Stripe webhook handler
-GET    /api/v1/billing/stripe/customers/:id     # Get Stripe customer
-POST   /api/v1/billing/stripe/setup-intent      # Create setup intent
-```
-
-#### **Analytics**
-```bash
-GET    /api/v1/analytics/dashboard              # Dashboard metrics
-GET    /api/v1/analytics/usage                  # Usage statistics
-GET    /api/v1/analytics/scheduling             # Scheduling analytics
-```
-
-### **WebSocket Events**
-
-Connect to `/notifications` namespace with JWT token:
-
-```javascript
-const socket = io('/notifications', {
-  auth: { token: 'your-jwt-token' }
-});
-
-// Listen for notifications
-socket.on('notification', (data) => {
-  console.log('New notification:', data);
-});
-
-// Join specific rooms
-socket.emit('join-room', 'teachers');
-socket.emit('join-room', 'school-123');
-```
-
-## 🔧 **Configuration**
-
-### **Subscription Plans**
-
-| Plan | Price | Schools | Users | Students | Features |
-|------|-------|---------|-------|----------|----------|
-| **Starter** | $29.99/month | 1 | 50 | 500 | Basic scheduling, Email support |
-| **Professional** | $79.99/month | 3 | 200 | 2,000 | Advanced scheduling, SMS, Priority support |
-| **Enterprise** | $199.99/month | Unlimited | Unlimited | Unlimited | Full features, 24/7 support, API access |
-
-### **Scheduling Constraints**
-
-#### **Hard Constraints** (Must be satisfied)
-1. **Teacher Conflict** - Teacher can't be in multiple places
-2. **Room Conflict** - Room can't host multiple sessions
-3. **Class Conflict** - Class can't attend multiple sessions
-4. **Teacher Availability** - Respect teacher availability windows
-5. **Room Capacity** - Don't exceed room capacity
-6. **Time Slot Validity** - Use only valid time slots
-
-#### **Soft Constraints** (Optimization goals)
-1. **Teacher Preferences** - Prefer teacher's preferred time slots
-2. **Room Preferences** - Match subjects to appropriate room types
-3. **Workload Distribution** - Balance teacher workloads
-4. **Time Preferences** - Optimize for preferred scheduling patterns
-5. **Subject Preferences** - Consider subject-specific requirements
-6. **Consecutive Periods** - Minimize gaps in schedules
-
-## 🔒 **Security**
-
-### **Authentication & Authorization**
-- JWT tokens with configurable expiration
-- Refresh token rotation for enhanced security
-- Role-based access control with 4 user levels
-- Multi-tenant data isolation
-
-### **Data Protection**
-- Input validation on all endpoints
-- SQL injection prevention with Prisma ORM
-- Rate limiting to prevent abuse
-- Secure password hashing with bcrypt
-
-### **API Security**
-- CORS configuration for cross-origin requests
-- Helmet.js for security headers
-- Request throttling and rate limiting
-- Comprehensive error handling without data leakage
-
-## 📈 **Performance**
-
-### **Optimization Features**
-- **Background Processing** - Heavy operations run asynchronously
-- **Caching** - Redis caching for frequently accessed data
-- **Database Optimization** - Efficient queries with proper indexing
-- **Connection Pooling** - Optimized database connections
-
-### **Scalability**
-- **Horizontal Scaling** - Stateless architecture supports load balancing
-- **Queue Management** - Bull Queue handles high-volume job processing
-- **Multi-tenant** - Single instance serves multiple organizations
-- **Microservice Ready** - Modular architecture for easy service separation
-
-## 🧪 **Testing**
-
-```bash
-# Unit tests
-npm run test
-
-# Integration tests
-npm run test:e2e
-
-# Test coverage
-npm run test:cov
-
-# Watch mode
-npm run test:watch
-```
-
-## 📦 **Deployment**
-
-### **Docker Deployment**
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-RUN npm run build
-EXPOSE 3000
-CMD ["npm", "run", "start:prod"]
-```
-
-### **Environment Setup**
-```bash
-# Production environment
-NODE_ENV=production
-PORT=3000
-DATABASE_URL="postgresql://your_user:your_password@database_host:5432/sasscolmng_prod"
-REDIS_HOST="redis"
-```
+## 📚 **Documentation**
+
+- **[API Documentation](docs/api/)** - Complete REST API reference
+- **[Architecture Guide](docs/architecture/)** - System architecture and design patterns
+- **[Deployment Guide](docs/deployment/)** - Production deployment instructions
+- **[User Manual](docs/user-manual/)** - End-user documentation
+- **[Developer Guide](docs/development/)** - Development setup and guidelines
 
 ## 🤝 **Contributing**
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 ## 📄 **License**
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 **Support**
+## 🌟 **Project Summary**
 
-- **Documentation**: [API Docs](http://localhost:3000/api/docs)
-- **Issues**: [GitHub Issues](https://github.com/abdoElHodaky/sasscolmng/issues)
-- **Email**: support@sasscolmng.com
+**This comprehensive SaaS School Management Platform revolutionizes educational technology by seamlessly integrating multi-tenant architecture, AI-powered scheduling, global payment processing, and real-time communication systems to deliver an enterprise-grade solution that empowers schools, teachers, students, and parents worldwide with intelligent, scalable, and secure educational management capabilities designed with golden ratio principles for optimal user experience and operational excellence.**
 
-## 🎯 **Roadmap**
-
-### **Phase 4: Frontend Development**
-- React/Vue.js dashboard
-- Mobile-responsive design
-- Real-time updates
-- Interactive scheduling interface
-
-### **Phase 5: Mobile Applications**
-- iOS and Android apps
-- Push notifications
-- Offline capabilities
-- Parent/student portals
-
-### **Phase 6: Advanced Features**
-- Machine learning for predictive scheduling
-- Advanced analytics and insights
-- Third-party integrations
-- Custom workflow automation
-
----
-
-## 📊 **Project Statistics**
-
-- **90+ Files** - Comprehensive codebase (+25 new files)
-- **17,000+ Lines** - TypeScript implementation (+4,800 lines)
-- **200+ API Endpoints** - Complete REST API (+40 endpoints)
-- **32 Database Models** - Comprehensive data modeling (+8 models)
-- **21 Enums** - Type-safe enumerations (+8 enums)
-- **90% Feature Complete** - Major milestone achieved! 🎉
-
-### **Latest Major Updates** 🚀 **December 2024**
-
-#### **🎉 MILESTONE ACHIEVED: 100% TypeScript Error Resolution** ✅
-- ✅ **Complete Error Resolution** - From 114 errors to 0 errors (100% improvement)
-  - **Phase 4 Part 1** - OR-Tools service interface methods implementation
-  - **Phase 4 Part 2** - Scheduling engine service fixes and configuration
-  - **Phase 4 Part 3** - Final service integration and health checks
-  - **EmailService** - Added getServiceStatus() method for health monitoring
-  - **Export Service** - Fixed ical-generator import pattern for calendar generation
-
-#### **🏗️ SMART SCHEDULING ENGINE** ✅ **95% Complete**
-- ✅ **Google OR-Tools Integration** - CP-SAT constraint programming solver
-  - **or-tools.service.ts** (400+ lines) - Complete solver interface implementation
-  - **scheduling-engine.service.ts** (500+ lines) - Advanced scheduling algorithms
-  - **Constraint Processing** - Hard and soft constraint satisfaction
-  - **Conflict Resolution** - Intelligent conflict detection and resolution
-  - **Performance Optimization** - Efficient scheduling for 1000+ classes
-
-#### **📱 COMPREHENSIVE NOTIFICATION SYSTEM** ✅ **98% Complete**
-- ✅ **Multi-Channel Communication** - Email, SMS, Push, WebSocket, In-App
-  - **notification-history.service.ts** (491 lines) - Complete tracking and analytics
-  - **notification-preference.service.ts** (536 lines) - User preference management
-  - **Template System** - Dynamic templates with variable substitution
-  - **Delivery Analytics** - Comprehensive statistics and reporting
-  - **Bulk Operations** - Efficient mass notification management
-
-#### **💳 ENTERPRISE BILLING SYSTEM** ✅ **95% Complete**
-- ✅ **Complete SaaS Billing** - Full enterprise-grade implementation
-  - **subscription.service.ts** (622 lines) - Complete subscription lifecycle
-  - **Stripe Integration** - Seamless payment processing with webhooks
-  - **Analytics** - Revenue metrics (MRR, ARR, ARPU), churn analysis
-  - **Multi-tier Plans** - Starter, Professional, Enterprise tiers
-  - **Usage Tracking** - Real-time monitoring with limit enforcement
-
-#### **🔧 PRODUCTION-READY INFRASTRUCTURE** ✅
-- ✅ **Docker & Kubernetes** - Complete containerization and orchestration
-- ✅ **Monitoring Stack** - Prometheus, Grafana, Alertmanager integration
-- ✅ **CI/CD Pipeline** - GitHub Actions with automated testing
-- ✅ **Security Hardening** - JWT authentication, RBAC, input validation
-- ✅ **Database Optimization** - PostgreSQL with Prisma ORM and indexing
-
-### **🎯 Current Platform Status**
-- **Overall Completion**: ✅ **100%** (COMPLETE - Production Ready!)
-- **Core Infrastructure**: ✅ **100%** Complete
-- **API Framework**: ✅ **100%** Complete  
-- **Smart Scheduling**: ✅ **100%** Complete (Performance optimization & caching)
-- **Notifications**: ✅ **100%** Complete (Advanced analytics & A/B testing)
-- **Billing System**: ✅ **100%** Complete (Analytics, forecasting & dunning)
-- **Advanced Features**: ✅ **100%** Complete (Dashboard & waiting lists)
-- **Production Deployment**: ✅ **100%** Complete (Security & monitoring)
-- **Security & Compliance**: ✅ **100%** Complete (Hardening & audit tools)
-- **Monitoring & Alerting**: ✅ **100%** Complete (Prometheus & Grafana)
-- **Documentation**: ✅ **95%** Complete
-
-### **📊 Technical Achievements**
-- **Zero TypeScript Errors** - 100% compilation success
-- **200+ API Endpoints** - Complete REST API implementation
-- **32 Database Models** - Comprehensive data modeling
-- **17,000+ Lines of Code** - Production-ready TypeScript implementation
-- **Multi-tenant Architecture** - Complete tenant isolation and security
-
-**Built with ❤️ for educational institutions worldwide**
-
----
-
-## 📊 **Performance Metrics & Benchmarks**
-
-<div align="center">
-
-### 🚀 **Real-Time Performance Dashboard** ✨ *φ = 1.618 Proportions*
-
-```
-┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                                                                                                                                     │
-│                                            ⚡ SYSTEM PERFORMANCE METRICS                                                                           │
-│                                                  🌟 Golden Ratio Grid System 🌟                                                                   │
-│                                                                                                                                                     │
-│                                                                                                                                                     │
-│    ┌─────────────────────────────┐        ┌─────────────────────────────┐        ┌─────────────────────────────┐        ┌─────────────────────────────┐    │
-│    │                             │        │                             │        │                             │        │                             │    │
-│    │        🎯 API Response      │        │       💳 Payment Success    │        │      🧠 AI Scheduling      │        │      📱 Notifications       │    │
-│    │                             │        │                             │        │                             │        │                             │    │
-│    │                             │        │                             │        │                             │        │                             │    │
-│    │         < 200ms             │        │          > 95%              │        │         < 5 sec             │        │         < 3 sec             │    │
-│    │                             │        │                             │        │                             │        │                             │    │
-│    │      ✅ Excellent           │        │       ✅ Excellent          │        │       ✅ Excellent          │        │        ✅ Fast              │    │
-│    │                             │        │                             │        │                             │        │                             │    │
-│    │    🔥 99.2% Uptime          │        │    💰 $2M+ Processed        │        │    🎓 10K+ Generated        │        │    🔔 50K+ Daily            │    │
-│    │    ⚡ <100ms P95            │        │    🌍 25+ Countries         │        │    🤖 AI Optimization       │        │    📧 Multi-Channel         │    │
-│    │    🛡️ Enterprise SLA        │        │    🔒 PCI Compliant         │        │    📊 Real-time Updates     │        │    ⚡ Instant Delivery      │    │
-│    │                             │        │                             │        │                             │        │                             │    │
-│    └─────────────────────────────┘        └─────────────────────────────┘        └─────────────────────────────┘        └─────────────────────────────┘    │
-│                                                                                                                                                     │
-│                                                                                                                                                     │
-│                                                                                                                                                     │
-│    ┌─────────────────────────────┐        ┌─────────────────────────────┐        ┌─────────────────────────────┐        ┌─────────────────────────────┐    │
-│    │                             │        │                             │        │                             │        │                             │    │
-│    │      🔄 System Uptime       │        │      💾 Database Perf       │        │      🌐 Global Coverage     │        │       👥 User Capacity      │    │
-│    │                             │        │                             │        │                             │        │                             │    │
-│    │                             │        │                             │        │                             │        │                             │    │
-│    │         99.9%               │        │         < 50ms              │        │      195+ Countries         │        │        100K+ Users         │    │
-│    │                             │        │                             │        │                             │        │                             │    │
-│    │     ✅ Enterprise           │        │      ✅ Optimized           │        │      ✅ Worldwide           │        │      ✅ Scalable            │    │
-│    │                             │        │                             │        │                             │        │                             │    │
-│    │   🏆 99.95% Target          │        │   📊 Query Optimization     │        │   🗺️ Multi-Region Deploy   │        │   📈 Auto-Scaling          │    │
-│    │   🔧 Zero Downtime          │        │   🚀 Connection Pooling     │        │   🌍 CDN Distribution       │        │   🎯 Load Balancing         │    │
-│    │   📈 SLA Monitoring         │        │   💽 Efficient Indexing     │        │   ⚡ Edge Computing         │        │   🔄 Horizontal Scaling     │    │
-│    │                             │        │                             │        │                             │        │                             │    │
-│    └─────────────────────────────┘        └─────────────────────────────┘        └─────────────────────────────┘        └─────────────────────────────┘    │
-│                                                                                                                                                     │
-│                                                                                                                                                     │
-│                                                                                                                                                     │
-│                                    🎯 Performance Targets Exceeded  •  📊 Real-time Monitoring  •  🚀 Enterprise Grade                          │
-│                                                                                                                                                     │
-└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-```
-│  │   99.9%         │  │   < 50ms        │  │   195+ Countries│  │   100K+     │ │
-│  │   ✅ Enterprise │  │   ✅ Optimized  │  │   ✅ Worldwide  │  │  ✅ Scalable│ │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘  └─────────────┘ │
-└─────────────────────────────────────────────────────────────────────────────────┘
-```
-
-</div>
-
-## 🏆 **Feature Comparison Matrix**
-
-<div align="center">
-
-| 🎯 **Feature Category** | 🆓 **Starter** | 💼 **Professional** | 🏢 **Enterprise** | 🌟 **Custom** |
-|-------------------------|----------------|---------------------|-------------------|----------------|
-| **👥 User Capacity** | 100 users | 1,000 users | 10,000+ users | Unlimited |
-| **🏫 Schools/Tenants** | 1 school | 5 schools | 50+ schools | Unlimited |
-| **🧠 AI Scheduling** | ✅ Basic | ✅ Advanced | ✅ Enterprise | ✅ Custom AI |
-| **💳 Payment Gateways** | 1 gateway | 2 gateways | 3+ gateways | Custom integration |
-| **💱 Multi-Currency** | ❌ | ✅ 5 currencies | ✅ 12+ currencies | ✅ All currencies |
-| **🏛️ Tax Compliance** | ❌ | ✅ 3 regions | ✅ 8+ regions | ✅ Global compliance |
-| **📱 Notifications** | Email only | Email + SMS | All channels | Custom channels |
-| **📊 Analytics** | Basic reports | Advanced analytics | Enterprise BI | Custom dashboards |
-| **🔒 Security** | Standard | Enhanced | Enterprise | Custom security |
-| **🌐 API Access** | Limited | Full REST API | GraphQL + REST | Custom APIs |
-| **☁️ Deployment** | Cloud only | Cloud + On-premise | Hybrid cloud | Custom deployment |
-| **🛠️ Support** | Community | Business hours | 24/7 priority | Dedicated team |
-
-</div>
-
-## 🌍 **Global Reach & Scalability**
-
-```
-                          🌍 WORLDWIDE DEPLOYMENT ARCHITECTURE
-    
-    ┌─────────────────────────────────────────────────────────────────────────────┐
-    │                            🌎 AMERICAS                                     │
-    │  🇺🇸 United States  🇨🇦 Canada  🇧🇷 Brazil  🇲🇽 Mexico  🇦🇷 Argentina      │
-    │  ✅ AWS US-East    ✅ Multi-AZ   ✅ Portuguese ✅ Spanish  ✅ Local Support  │
-    └─────────────────────────────────────────────────────────────────────────────┘
-                                        │
-    ┌─────────────────────────────────────────────────────────────────────────────┐
-    │                            🌍 EUROPE & AFRICA                              │
-    │  🇬🇧 United Kingdom 🇩🇪 Germany  🇫🇷 France  🇪🇬 Egypt  🇿🇦 South Africa   │
-    │  ✅ AWS EU-West    ✅ GDPR Ready ✅ Multi-lang ✅ Arabic   ✅ Local Banking  │
-    └─────────────────────────────────────────────────────────────────────────────┘
-                                        │
-    ┌─────────────────────────────────────────────────────────────────────────────┐
-    │                         🌏 ASIA PACIFIC & MENA                             │
-    │  🇸🇦 Saudi Arabia  🇦🇪 UAE  🇰🇼 Kuwait  🇶🇦 Qatar  🇧🇭 Bahrain  🇮🇳 India │
-    │  ✅ PayTabs Ready  ✅ VAT   ✅ Arabic   ✅ Local  ✅ Islamic  ✅ Multi-lang  │
-    └─────────────────────────────────────────────────────────────────────────────┘
-```
-
-## 🎯 **Success Stories & Use Cases**
-
-<div align="center">
-
-### 📈 **Platform Impact Metrics**
-
-| 🎯 **Metric** | 📊 **Value** | 📈 **Growth** | 🏆 **Achievement** |
-|---------------|--------------|---------------|-------------------|
-| **🏫 Schools Served** | 500+ | +150% YoY | Market Leader |
-| **👥 Active Users** | 50,000+ | +200% YoY | Rapid Adoption |
-| **📅 Schedules Generated** | 10,000+ | +300% YoY | AI Excellence |
-| **💳 Payments Processed** | $2M+ | +250% YoY | Financial Growth |
-| **🌍 Countries** | 25+ | +400% YoY | Global Expansion |
-| **⚡ Uptime** | 99.9% | Consistent | Enterprise Grade |
-
-</div>
-
-### 🎓 **Educational Institution Types**
-
-```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                        🎯 SUPPORTED INSTITUTION TYPES                          │
-│                                                                                 │
-│  🏫 K-12 Schools        🎓 Universities       🏛️ Academies        📚 Institutes  │
-│  ✅ Grade Management    ✅ Course Scheduling  ✅ Specialized      ✅ Training     │
-│  ✅ Parent Portal       ✅ Credit Systems     ✅ Certification    ✅ Corporate    │
-│  ✅ Attendance          ✅ Research Groups    ✅ Competitions     ✅ Professional │
-│                                                                                 │
-│  🌐 Online Schools      🏢 Corporate Unis    🎨 Art Schools      ⚕️ Medical      │
-│  ✅ Virtual Classes     ✅ Employee Training  ✅ Creative Courses ✅ Healthcare   │
-│  ✅ Remote Learning     ✅ Skill Development  ✅ Portfolio Mgmt   ✅ Compliance   │
-│  ✅ Digital Resources   ✅ Certification     ✅ Exhibition       ✅ Continuing Ed │
-└─────────────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-<div align="center">
-
-## 🚀 **Ready to Transform Your Educational Institution?**
-
-### 🌟 **Start Your Journey Today**
-
-[![Get Started](https://img.shields.io/badge/🚀_Get_Started-Free_Trial-brightgreen?style=for-the-badge&logo=rocket)](https://github.com/abdoElHodaky/sasscolmng)
-[![Documentation](https://img.shields.io/badge/📚_Documentation-Read_Docs-blue?style=for-the-badge&logo=gitbook)](docs/)
-[![Live Demo](https://img.shields.io/badge/🎯_Live_Demo-Try_Now-orange?style=for-the-badge&logo=play)](https://demo.sasscolmng.com)
-[![Contact Sales](https://img.shields.io/badge/💼_Enterprise-Contact_Sales-purple?style=for-the-badge&logo=handshake)](mailto:sales@sasscolmng.com)
-
-### 💬 **Join Our Community**
-
-[![Discord](https://img.shields.io/badge/Discord-Join_Community-7289da?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/sasscolmng)
-[![Twitter](https://img.shields.io/badge/Twitter-Follow_Updates-1da1f2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/sasscolmng)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077b5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/company/sasscolmng)
-
----
-
-**🌟 Empowering Education Through Intelligent Technology Solutions 🌟**
-
-*Built with ❤️ for educational institutions worldwide*
-
-</div>
